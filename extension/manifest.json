@@ -1,0 +1,53 @@
+{
+	"manifest_version": 2,
+	"name": "AudioPick",
+	"short_name": "AudioPick",
+	"description": "Pick a default audio output device. Only works for HTML5 <video/> and <audio/> elements served via HTTPS.",
+	"author": "necropola@gmail.com",
+	"homepage_url": "https://plus.google.com/collection/swqxgB",
+	"version": "0.1.4",
+	"version_name": "0.1.4 alpha",
+	"minimum_chrome_version": "50.0",
+	"page_action": {
+		"default_icon": {
+			"19": "AP_Icon19.png",
+			"38": "AP_Icon38.png"
+		},
+		"default_title": "AudioPick Temporarily",
+		"default_popup": "popup.html"
+	},	
+	"icons": {
+		"16": "AP_Icon16.png",
+		"19": "AP_Icon19.png",
+		"24": "AP_Icon24.png",
+		"32": "AP_Icon32.png",
+		"38": "AP_Icon38.png",
+		"48": "AP_Icon48.png",
+		"64": "AP_Icon96.png",
+		"96": "AP_Icon96.png",
+		"128": "AP_Icon128.png"
+	},
+	"background": {
+		"page": "background.html",
+		"persistent": true
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"https://*/*",
+				"http://*/*"
+			],
+			"js": ["content.js"],
+			"all_frames" : true
+		}
+	],
+	"options_ui": {
+		"chrome_style": true,
+		"page": "options.html"
+	},
+	"permissions": [
+		"declarativeContent",
+		"activeTab",
+		"storage"
+	]
+}
