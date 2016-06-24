@@ -5,8 +5,8 @@
 	"description": "Pick a default audio output device. Only works for HTML5 <video/> and <audio/> elements served via HTTPS.",
 	"author": "necropola@gmail.com",
 	"homepage_url": "https://plus.google.com/collection/swqxgB",
-	"version": "0.1.4",
-	"version_name": "0.1.4 alpha",
+	"version": "0.2.0",
+	"version_name": "0.2.0 alpha",
 	"minimum_chrome_version": "50.0",
 	"page_action": {
 		"default_icon": {
@@ -47,6 +47,7 @@
 	},
 	"permissions": [
 		"declarativeContent",
+		"contentSettings",
 		"activeTab",
 		"storage"
 	]

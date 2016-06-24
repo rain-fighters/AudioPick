@@ -1,5 +1,5 @@
 /*
- * $Id: popup.js 41 2016-05-17 01:02:15Z  $
+ * $Id: popup.js 49 2016-05-18 05:11:10Z  $
  */
  
 'use strict';
@@ -17,6 +17,7 @@ var sink_no = default_no.value;
 			log('Sending message: report_sink_no');
 			chrome.tabs.sendMessage(activeTab.id,
 				{"message": "report_sink_no"},
+				{'frameId': 0}, // only request from main frame
 				function(response) {
 					if (response) {
 						log("Received Response: " + response.sink_no);
@@ -98,7 +99,7 @@ function input_onchange(e) {
 		function(tabs) {
 			var activeTab = tabs[0];
 			log('Sending message: page_action_commit, sink_no: ' + sink_no);
-			chrome.tabs.sendMessage(activeTab.id, {
+			chrome.tabs.sendMessage(activeTab.id, { // send to all frames without using options = {'frameId': N} 
 				"message": "page_action_commit",
 				"sink_no":  sink_no
 			});

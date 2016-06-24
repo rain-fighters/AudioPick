@@ -1,25 +1,56 @@
 /*
- * $Id: background.js 41 2016-05-17 01:02:15Z  $
+ * $Id: background.js 49 2016-05-18 05:11:10Z  $
  */
 
  'use strict';
   
  var stored_id = 'default'
  var stored_no = 0;
+ var extension_id = chrome.runtime.id;
  
+ // Haha, it seems we no longer need getUserMedia() ...
+chrome.contentSettings['microphone'].set({'primaryPattern':'*://' + extension_id + '/*','setting':'allow'});
+
 chrome.runtime.onMessage.addListener(
 	function (message, sender, sendResponse) {
-		log('Received message: ' + message.method);
 		if (message.method == "AP_get_default_no") {
-			var default_no = document.getElementById("default_no");
-			log('Reply with: default_no: ' + default_no.value);
-			sendResponse({'default_no': default_no.value});
+			log('Received message: ' + message.method + ' from frame ' + sender.frameId + ' on tab ' + sender.tab.id);
+			if (sender.frameId != 0 ) {
+				log('Asking top frame: report_sink_no');
+				chrome.tabs.sendMessage(sender.tab.id,
+					{"message": "report_sink_no"},
+					{'frameId': 0},  // request from top frame
+					function(response) {
+						if (response) {
+							var default_no = document.getElementById("default_no");
+							log("Received Response from top frame: " + response.sink_no);
+							if (response.sink_no != 0) {
+								log('Reply to sub frame ' + sender.frameId + ' with: top sink_no: ' + response.sink_no);
+								sendResponse({'default_no': response.sink_no});
+							} else {
+								log('Reply to sub frame ' + sender.frameId + ' with: default_no: ' + default_no.value);
+								sendResponse({'default_no': default_no.value});
+							}
+						}
+					}
+				);
+			} else {
+				var default_no = document.getElementById("default_no");
+				log('Reply with: default_no: ' + default_no.value);
+				sendResponse({'default_no': default_no.value});
+			}
+		} else if (message.method == "AP_help_with_GUM") {
+			log('Received message: ' + message.method + ', primaryPattern: ' + message.primaryPattern);
+			chrome.contentSettings['microphone'].set({'primaryPattern': message.primaryPattern,'setting':'allow'});
+			log('Reply with: result: ' + 'Have fun!');
+			sendResponse({'result': 'Have fun!'});
 		}
+		return true;
     }
  )
  
-// -- Use declarativeContent to only enable the page_action when the page is served via HTTPS
-// -- and contains <video/> and/or <audio/> elements 
+// -- Use declarativeContent to only enable the page_action ... does not work properly (the PageStateMatcher does not)
+// -- We could actually switch back to a browser action
 chrome.runtime.onInstalled.addListener(function() {
 	chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
 		chrome.declarativeContent.onPageChanged.addRules([{
@@ -37,8 +68,8 @@ chrome.runtime.onInstalled.addListener(function() {
 function init() {
 	var default_no = document.getElementById("default_no");
 	default_no.value = stored_no;
-	// We could include the around 2500 lines of code from WebRTCs "adapter.js"
-	// and then call "navigator.mediaDevices.getUserMedia()", but why should we?
+	// We no longer need getUserMedia(), because we have written our extension id to contentSettings['microphone']
+/*
 	navigator.webkitGetUserMedia(
 		{
 			audio:true,
@@ -57,6 +88,10 @@ function init() {
 				.catch(errorCallback);
 		}
 	);
+*/
+	navigator.mediaDevices.enumerateDevices()
+		.then(update_device_cache)
+		.catch(errorCallback);
 }
 
 function errorCallback(error) {
@@ -68,8 +103,9 @@ function log(message) {
 }
                                                                                                                                                                                                                                                                                                            
 function update_device_cache(deviceInfos) {
-	log('update_device_cache: ' + deviceInfos.length + ' device(s) total (audio/video input/output)');
+	var default_no = document.getElementById("default_no");
 	var select = document.getElementById('device_cache');
+	log('update_device_cache: ' + deviceInfos.length + ' device(s) total (audio/video input/output)');
 	for (var i = 0; i !== deviceInfos.length; ++i) {
 		var kind = deviceInfos[i].kind;
 		var id = deviceInfos[i].deviceId;
@@ -77,6 +113,10 @@ function update_device_cache(deviceInfos) {
 		//log('device: ' + id + ' - ' + text);
 		if (kind === 'audiooutput') {
 			if (id == "default") {
+				if (stored_no == 0) {
+					stored_no = i;
+					default_no.value = stored_no;
+				}
 				text = "System Default Device";
 			} else if (id == "communications") {
 				text = "System Default Communications Device";

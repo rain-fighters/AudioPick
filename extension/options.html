@@ -1,41 +1,23 @@
 <!DOCTYPE html>
 <!--
- * $Id: options.html 36 2016-05-15 23:06:46Z  $
+ * $Id: options.html 49 2016-05-18 05:11:10Z  $
  * Provides a list to pick the default device for the browser from
  * Assists in (initially) getting enumerateDevices() to work from the background page
 -->
 <html>
 	<head><title>AudioPick Options</title></head>
 	<style>
-		body {width:42em; line-height:1.25em;}
+		body {width:auto; line-height:1.25em;}
+		b {white-space:nowrap;}
 		p {line-height:inherit;margin-top:0em; margin-bottom:0.5em;}
 		ul {margin-top:0em; margin-bottom:0.5em;}
 		li {padding:0.125em;}
-		label {display:block; vertical-align:bottom; padding:0.25em; margin-left:1.5em;}
+		label {display:block; white-space:nowrap; vertical-align:bottom; padding:0.25em; margin-left:1.5em;}
 		input[type=radio] {vertical-align:bottom; margin-right:0.75em;}
 	</style>
 	<script src="options.js"></script>
 <body>
-	<p>This page needs to successfully call <b>getUserMedia()</b> once in order
-	for the <em>Background</em> page to succeed in calling <b>getUserMedia()</b> 
-	from there on without further help (until time runs out, the cash is cleared, ... I don't know).
-	Otherwise <b>enumerateDevices()</b> returns empty device labels which makes
-	it rather hard to actually pick the desired device.</p>
-
-	<p>Note that calls to <b>getUserMedia()</b> do <b>not work</b> when the <em>Options</em> page
-	is a popup window on the <em>Extensions</em> tab, i. e. it's defined via <b>options_ui</b>
-	in the manifest (which it is). In that case the devices will show up with their <b>internal ids</b>
-	and not with their human readable <b>labels</b> and you will need to do the following, once.
-	<ul>
-		<li><b>Open</b> the <a id="options_link" href="./options.html" target="AudioPick_Options" onclick="window.close()">Options Full Page</a></li>
-		<li><b>Approve</b> the one-time request to access your local media (microphone (and camera))<br/>
-			Your (previous) approval is indicated by a red dot on the tab</li>
-		<li><b>Refresh</b> the options full page (<em>AudioPick Options</em> tab) by pressing <b>F5</b></li>
-		<li><b>Close</b> the options full page (<em>AudioPick Options</em> tab)</li>
-		<li><b>Refresh</b> the options_ui popup window (<em>Extensions</em> tab) by pressing <b>F5</b></li>
-		<li><b>Procede</b> to ...</li>
-	</ul>
-	<b>Pick a default device for audio output and close this popup window</b>
+	<b>Pick a default device for audio output and close this window</b>
 	<div id="device_options"></div>
 </body>
 </html>
