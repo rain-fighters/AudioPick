@@ -1,5 +1,5 @@
 /*
- * $Id: content.js 51 2016-05-18 21:17:12Z  $
+ * $Id: content.js 57 2016-05-21 19:35:55Z  $
  */
 
  'use strict';
@@ -35,8 +35,8 @@ function errorCallback(error) {
 function register_message_listener() {
 	chrome.runtime.onMessage.addListener(
 		function(request, sender, sendResponse) {
-			if (request.message === "page_action_commit" ) {
-				log('Received message: page_action_commit, sink_no: ' + request.sink_no);
+			if (request.message === "browser_action_commit" ) {
+				log('Received message: browser_action_commit, sink_no: ' + request.sink_no);
 				if (request.sink_no != undefined) {
 					sink_no = request.sink_no;
 					get_devices(); // --> inspect_device_infos() --> update_all_sinks()
@@ -136,23 +136,6 @@ function inspect_devices(deviceInfos) {
 
 function with_or_without_GUM() {
 	if (GUM_state == 0) {
-		/*
-		navigator.webkitGetUserMedia(
-			{
-				audio:true,
-				video:false
-			},
-			function(stream) {
-				log('GUM succeeded');
-				GUM_state = 1;
-				update_all_sinks(); // should work now
-			},
-			function(stream) {
-				log('GUM failed');
-				GUM_state = -1;
-			}
-		);
-		*/
 		request_help_with_GUM();
 	} else {
 		update_all_sinks();		

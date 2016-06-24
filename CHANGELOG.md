@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### AudioPick-0.2.2 - 2016-05-21
+- going stable
+- revert `page_action back` to `browser_action`
+- code cleanup
+
 ### AudioPick-0.2.1 - 2016-05-18
 - quick fix for to prevent a loop caused by the *observer*
 

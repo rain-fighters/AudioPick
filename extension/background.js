@@ -1,5 +1,5 @@
 /*
- * $Id: background.js 49 2016-05-18 05:11:10Z  $
+ * $Id: background.js 57 2016-05-21 19:35:55Z  $
  */
 
  'use strict';
@@ -49,46 +49,10 @@ chrome.runtime.onMessage.addListener(
     }
  )
  
-// -- Use declarativeContent to only enable the page_action ... does not work properly (the PageStateMatcher does not)
-// -- We could actually switch back to a browser action
-chrome.runtime.onInstalled.addListener(function() {
-	chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
-		chrome.declarativeContent.onPageChanged.addRules([{
-			conditions: [
-				new chrome.declarativeContent.PageStateMatcher({
-					pageUrl: { schemes: ['https','http']},
-				}),
-			],
-			actions: [new chrome.declarativeContent.ShowPageAction() ]
-		}]);
-	});
-});
-
 // -- Initialize device_cache (list of available devices)
 function init() {
 	var default_no = document.getElementById("default_no");
 	default_no.value = stored_no;
-	// We no longer need getUserMedia(), because we have written our extension id to contentSettings['microphone']
-/*
-	navigator.webkitGetUserMedia(
-		{
-			audio:true,
-			video:false
-		},
-		function(stream) {
-			log('getUserMedia: success (as it should be, after being helped by options full page)');
-			navigator.mediaDevices.enumerateDevices()
-				.then(update_device_cache)
-				.catch(errorCallback);
-		},
-		function(stream) {
-			log('getUserMedia: error (as is expected, before being helped by options full page)');
-			navigator.mediaDevices.enumerateDevices()
-				.then(update_device_cache)
-				.catch(errorCallback);
-		}
-	);
-*/
 	navigator.mediaDevices.enumerateDevices()
 		.then(update_device_cache)
 		.catch(errorCallback);

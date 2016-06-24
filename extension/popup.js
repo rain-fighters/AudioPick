@@ -1,5 +1,5 @@
 /*
- * $Id: popup.js 49 2016-05-18 05:11:10Z  $
+ * $Id: popup.js 57 2016-05-21 19:35:55Z  $
  */
  
 'use strict';
@@ -93,14 +93,14 @@ function update_device_popup(deviceInfos) {
 }
 
 function input_onchange(e) {
-	//log('PageAction Commit');
+	//log('browser_action Commit');
 	var sink_no = e.target.value;	
 	chrome.tabs.query({active: true, currentWindow: true},
 		function(tabs) {
 			var activeTab = tabs[0];
-			log('Sending message: page_action_commit, sink_no: ' + sink_no);
+			log('Sending message: browser_action_commit, sink_no: ' + sink_no);
 			chrome.tabs.sendMessage(activeTab.id, { // send to all frames without using options = {'frameId': N} 
-				"message": "page_action_commit",
+				"message": "browser_action_commit",
 				"sink_no":  sink_no
 			});
 			window.close();

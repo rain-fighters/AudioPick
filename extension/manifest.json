@@ -5,15 +5,15 @@
 	"description": "Pick a default audio output device. Only works for HTML5 <video/> and <audio/> elements served via HTTP(S).",
 	"author": "necropola@gmail.com",
 	"homepage_url": "https://plus.google.com/collection/swqxgB",
-	"version": "0.2.1",
-	"version_name": "0.2.1 alpha",
+	"version": "0.2.2",
+	"version_name": "0.2.2",
 	"minimum_chrome_version": "50.0",
-	"page_action": {
+	"browser_action": {
 		"default_icon": {
 			"19": "AP_Icon19.png",
 			"38": "AP_Icon38.png"
 		},
-		"default_title": "AudioPick Temporarily",
+		"default_title": "AudioPick current Tab",
 		"default_popup": "popup.html"
 	},	
 	"icons": {
@@ -46,7 +46,6 @@
 		"page": "options.html"
 	},
 	"permissions": [
-		"declarativeContent",
 		"contentSettings",
 		"activeTab",
 		"storage"
