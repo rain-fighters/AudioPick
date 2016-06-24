@@ -1,5 +1,5 @@
 /*
- * $Id: content.js 49 2016-05-18 05:11:10Z  $
+ * $Id: content.js 51 2016-05-18 21:17:12Z  $
  */
 
  'use strict';
@@ -59,7 +59,8 @@ function register_observer() {
 				function(mutation) {
 					//log('mutation.type: ' + mutation.type);
 					if (mutation.type == 'attributes') {
-						if (check_node(mutation.target)) needs_update = true;
+						// This can cause a loop!
+						//if (check_node(mutation.target)) needs_update = true;
 					} else {
 						for (var i = 0; i < mutation.addedNodes.length; i++) {
 							if (check_node(mutation.addedNodes[i])) needs_update = true;
