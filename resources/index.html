@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>AudioPick</title>
+	<link rel="stylesheet" href="WebRTC/_/css/fonts.css"  type="text/css">
+	<link rel="stylesheet" href="WebRTC/_/css/main.css">
+	<link rel="stylesheet" href="WebRTC/css/main.css">
+	<link rel="icon" type="image/png" href="AP_icon48.png" />
+	<script src="index.js"></script>
+</head>
+<body>
+<div id="container">
+	<h1>Refererences</h1>
+	<table>
+		<tr><td>
+			<a href="https://webrtc.github.io/samples/src/content/devices/multi/" target="WebRTC_Orig">The WebRTC original sample</a>
+		</td></tr>
+		<tr><td>
+			<a href="https://github.com/webrtc/samples/tree/gh-pages/src/content/devices/multi" target="WebRTC_Source">Source (git) of the WebRTC sample</a>
+		</td></tr>
+		<tr><td>
+			<a href="https://robots.thoughtbot.com/how-to-make-a-chrome-extension" target="Tutorial_1">How to make a Chrome Extension by Gabe Berke-Williams</a>
+		</td></tr>
+	</table>
+	<p/>
+	<h1>Demo</h1>
+	<div id="sources">
+		<div>
+			<video title="local video file" controls loop poster="WebRTC/images/poster.jpg" preload="metadata">
+				<source src="WebRTC/video/chrome.webm" type="video/webm" />
+				<source src="WebRTC/video/chrome.mp4" type="video/mp4" />
+				<p>This browser does not support the video element.</p>
+			</video>
+		</div>
+		<div>
+			<audio title="local audio file" controls loop>
+				<source src="WebRTC/audio/audio.mp3" type="audio/mp3" />
+				<p>This browser does not support the audio element.</p>
+			</audio>
+			<div id="more_audio">
+				<button type="button" id="play_hidden_audio" onclick="play_hidden_audio()">Play Hidden</button>
+				<button type="button" id="pause_hidden_audio" onclick="pause_hidden_audio()">Pause Hidden</button>
+				<button type="button" id="add_visiblen_audio" onclick="add_visible_audio()">Add Visible</button>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>

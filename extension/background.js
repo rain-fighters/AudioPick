@@ -1,14 +1,10 @@
-/*
- * $Id: background.js 57 2016-05-21 19:35:55Z  $
- */
+'use strict';
 
- 'use strict';
-  
- var stored_id = 'default'
- var stored_no = 0;
- var extension_id = chrome.runtime.id;
- 
- // Haha, it seems we no longer need getUserMedia() ...
+var stored_id = 'default'
+var stored_no = 0;
+var extension_id = chrome.runtime.id;
+
+// We no longer need getUserMedia() ...
 chrome.contentSettings['microphone'].set({'primaryPattern':'*://' + extension_id + '/*','setting':'allow'});
 
 chrome.runtime.onMessage.addListener(
@@ -19,7 +15,7 @@ chrome.runtime.onMessage.addListener(
 				log('Asking top frame: report_sink_no');
 				chrome.tabs.sendMessage(sender.tab.id,
 					{"message": "report_sink_no"},
-					{'frameId': 0},  // request from top frame
+					{'frameId': 0}, // request from top frame
 					function(response) {
 						if (response) {
 							var default_no = document.getElementById("default_no");
@@ -46,9 +42,9 @@ chrome.runtime.onMessage.addListener(
 			sendResponse({'result': 'Have fun!'});
 		}
 		return true;
-    }
- )
- 
+	}
+)
+
 // -- Initialize device_cache (list of available devices)
 function init() {
 	var default_no = document.getElementById("default_no");
@@ -65,7 +61,7 @@ function errorCallback(error) {
 function log(message) {
 	console.log('background: ' +  message);
 }
-                                                                                                                                                                                                                                                                                                           
+
 function update_device_cache(deviceInfos) {
 	var default_no = document.getElementById("default_no");
 	var select = document.getElementById('device_cache');
@@ -94,7 +90,7 @@ function update_device_cache(deviceInfos) {
 					option = document.createElement("option");
 					option.id = id;
 					option.value = text;
-					select.appendChild(option);				
+					select.appendChild(option);
 				}
 			}
 		}

@@ -1,14 +1,10 @@
-/*
- * $Id: options.js 36 2016-05-15 23:06:46Z  $
- */
- 
+'use strict';
+
 var bg = chrome.extension.getBackgroundPage();
- 
-// -- Help the background page in retrieving devices and update the default device selection page 
- function init() {
- 	// We could include the around 2500 lines of code from WebRTCs "adapter.js"
-	// and then call "navigator.mediaDevices.getUserMedia()", but why should we?
-	navigator.webkitGetUserMedia(
+
+// -- Help the background page in retrieving devices and update the default device selection page
+function init() {
+	navigator.mediaDevices.getUserMedia(
 		{
 			audio:true,
 			video:false
@@ -54,7 +50,7 @@ function update_device_options(deviceInfos) {
 		var kind = deviceInfos[i].kind;
 		var id = deviceInfos[i].deviceId;
 		var text = deviceInfos[i].label;
-		//log('device: ' + id + ' - ' + text);
+		log('device: ' + id + ' - ' + text);
 		if (kind === 'audiooutput') {
 			if (id == "default") {
 				text = "System Default Device";
@@ -75,7 +71,7 @@ function update_device_options(deviceInfos) {
 				option = bg.document.createElement("option");
 				option.id = id;
 				option.value = text;
-				select.appendChild(option);				
+				select.appendChild(option);
 			}
 			var input = document.createElement("input");
 			input.type= "radio";
@@ -88,7 +84,7 @@ function update_device_options(deviceInfos) {
 			if (i == default_no.value) {
 				log('current default_no: ' + i + ' - ' + id + ' - ' + text);
 				input.checked = true;
-			}			
+			}
 			label.appendChild(input);
 			label.appendChild(textNode);
 			div.appendChild(label);

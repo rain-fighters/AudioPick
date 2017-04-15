@@ -1,14 +1,10 @@
-/*
- * $Id: popup.js 57 2016-05-21 19:35:55Z  $
- */
- 
 'use strict';
- 
+
 var bg = chrome.extension.getBackgroundPage();
 var default_no = bg.document.getElementById("default_no");
 var sink_no = default_no.value;
 
-// -- Update the temporary device selection page 
+// -- Update the temporary device selection page
  function init() {
 	log('init');
  	chrome.tabs.query({active: true, currentWindow: true},
@@ -71,7 +67,7 @@ function update_device_popup(deviceInfos) {
 				option = bg.document.createElement("option");
 				option.id = id;
 				option.value = text;
-				select.appendChild(option);				
+				select.appendChild(option);
 			}
 			var input = document.createElement("input");
 			input.type= "radio";
@@ -84,7 +80,7 @@ function update_device_popup(deviceInfos) {
 			if (i == sink_no) {
 				log('current default_no: ' + i + ' - ' + id + ' - ' + text);
 				input.checked = true;
-			}			
+			}
 			label.appendChild(textNode);
 			label.appendChild(input);
 			div.appendChild(label);
@@ -99,7 +95,7 @@ function input_onchange(e) {
 		function(tabs) {
 			var activeTab = tabs[0];
 			log('Sending message: browser_action_commit, sink_no: ' + sink_no);
-			chrome.tabs.sendMessage(activeTab.id, { // send to all frames without using options = {'frameId': N} 
+			chrome.tabs.sendMessage(activeTab.id, { // send to all frames without using options = {'frameId': N}
 				"message": "browser_action_commit",
 				"sink_no":  sink_no
 			});

@@ -1,21 +1,18 @@
-/*
- * $Id: content.js 57 2016-05-21 19:35:55Z  $
- */
+'use strict';
 
- 'use strict';
- 
 var sink_no = 0;
 var sink_id = 'default';
 var frame_url = location.protocol + '//'+ location.host + location.pathname;
 var frame_depth = get_depth(window.self);
 var GUM_state = undefined;
+
 /*
  * undefined == wait with getUserMedia() until we know that we actually need to call setSinkId 
  *         0 == last call to setSinkId failed. Going to call getUserMedia() next time
  *         1 == getUserMedia() succeeded 
  *        -1 == getUserMedia() failed 
  */
- 
+
 function get_depth(w) {
 	if (w.parent == w) {
 		return 0;
@@ -23,6 +20,7 @@ function get_depth(w) {
 		return 1 + get_depth(w.parent);
 	}
 }
+
 function log(message) {
 	console.log('  '.repeat(frame_depth) + 'AudioPick(' + frame_url + '): ' + message);
 }
@@ -39,7 +37,7 @@ function register_message_listener() {
 				log('Received message: browser_action_commit, sink_no: ' + request.sink_no);
 				if (request.sink_no != undefined) {
 					sink_no = request.sink_no;
-					get_devices(); // --> inspect_device_infos() --> update_all_sinks()
+					get_devices();
 				}
 			} else if (request.message == "report_sink_no") {
 				log('Received message: report_sink_no');
@@ -48,34 +46,31 @@ function register_message_listener() {
 			}
 		}
 	)
-}	
+}
 
 // -- Register a Mutation Observer to monitor changes and additions of <audio/> and <video/> elements
 function register_observer() {
 	var observer = new MutationObserver(
 		function(mutations) {
-			var needs_update = false;
+			var nodes_added = 0;
 			mutations.forEach(
 				function(mutation) {
-					//log('mutation.type: ' + mutation.type);
-					if (mutation.type == 'attributes') {
-						// This can cause a loop!
-						//if (check_node(mutation.target)) needs_update = true;
-					} else {
-						for (var i = 0; i < mutation.addedNodes.length; i++) {
-							if (check_node(mutation.addedNodes[i])) needs_update = true;
-						}
+					for (var i = 0; i < mutation.addedNodes.length; i++) {
+						if (check_node(mutation.addedNodes[i])) nodes_added++;
 					}
 				}
 			);
-			if (needs_update) update_all_sinks();
+			if (nodes_added > 0) {
+				log('Updating sinks for new AUDIO/VIDEO nodes: ' + nodes_added);
+				update_all_sinks();
+			}
 		}
 	);
 	observer.observe(document.documentElement, {
 		childList: true,
 		subtree: true,
-		attributes: true,
-		characterData: true
+		attributes: false,
+		characterData: false
 	});
 }
 
@@ -83,7 +78,7 @@ function check_node(node) {
 	var name = node.nodeName;
 	var attributes = node.attributes
 	if ((name == 'AUDIO') || (name == 'VIDEO')) {
-		log('node added/changed: ' + name);
+		log('node added: ' + name);
 		return true;
 	}
 	return false;
@@ -103,18 +98,6 @@ function request_default_no() {
 	)
 }
 
-function request_help_with_GUM() {
-	chrome.runtime.sendMessage({'method': 'AP_help_with_GUM', 'primaryPattern': location.protocol + '//'+ location.host + '/*'},
-		function(response) {
-			if (response) {
-				log('Received result: ' + response.result);
-				GUM_state = 1;
-				update_all_sinks();
-			}
-		}
-	);
-}
-
 function get_devices() {
 	navigator.mediaDevices.enumerateDevices()
 		.then(inspect_devices)
@@ -131,15 +114,26 @@ function inspect_devices(deviceInfos) {
 			sink_id = deviceInfo.deviceId;
 		}
 	}
-	with_or_without_GUM();
+}
+
+function request_help_with_GUM() {
+	chrome.runtime.sendMessage({'method': 'AP_help_with_GUM', 'primaryPattern': location.protocol + '//'+ location.host + '/*'},
+		function(response) {
+			if (response) {
+				log('Received result: ' + response.result);
+				GUM_state = 1;
+				update_all_sinks();
+			}
+		}
+	);
 }
 
 function with_or_without_GUM() {
 	if (GUM_state == 0) {
 		request_help_with_GUM();
 	} else {
-		update_all_sinks();		
-	}	
+		update_all_sinks();
+	}
 }
 
 function update_all_sinks() {
@@ -152,7 +146,8 @@ function update_all_sinks() {
 		promises.push(allMedia[j].setSinkId(sink_id));
 	}
 	if (promises.length > 0) {
-		log('Tyring to update all (' + promises.length + ') sinks (GUM_state == ' + GUM_state + '): ' + sink_id);
+		log('Trying to update all (' + promises.length +
+			') sinks (GUM_state == ' + GUM_state + '): ' + sink_id);
 		Promise.all(promises)
 			.then(function(results){log('All set.'); })
 			.catch(function(error){
@@ -164,14 +159,14 @@ function update_all_sinks() {
 					log('SetSinkId failed: ' + error + '.  Giving up.');
 				}
 			});
-	} else {
+		} else {
 		log('No sinks found');
 	}
-	register_observer();
 }
 
 // -- main ---------------------------------------------------------------
 register_message_listener();
 request_default_no();
-
+register_observer();
+setInterval(update_all_sinks,5000);
 
