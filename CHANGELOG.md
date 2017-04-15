@@ -6,7 +6,7 @@
 - code cleanup
 
 ### AudioPick-0.2.1 - 2016-05-18
-- quick fix for to prevent a loop caused by the *observer*
+- quick fix to prevent a loop caused by the *observer*
 
 ### AudioPick-0.2.0 - 2016-05-18
 - substitute calls to `getUserMedia()` by `get_help_with_GUM`, i. e. write directly to `contentSettings['microphone']` thereby allowing the modification of audio/video on unencrypted pages 
