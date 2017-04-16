@@ -12,9 +12,8 @@ it allows those sites to access your microphone.
  
 ## Links
 - [AudioPick Extension on Chrome Webstore](https://chrome.google.com/webstore/detail/audiopick/gfhcppdamigjkficnjnhmnljljhagaha)
-- [AudioPick Source on GitHub](https://github.com/necropola/AudioPick)
-- [AudioPick Issues on GitHub](https://github.com/necropola/AudioPick/issues)
+- [AudioPick Source on GitHub](https://github.com/rain-fighters/AudioPick)
+- [AudioPick Issues on GitHub](https://github.com/rain-fighters/AudioPick/issues)
 - [Tech Corner Collection on Google+](https://plus.google.com/collection/swqxgB)
 - [Necropola on Google+](https://plus.google.com/108590874920717613332)
 - [Necropola on Twitter](https://twitter.com/necropola)
- 

@@ -1,24 +1,45 @@
 <!DOCTYPE html>
 <html>
-
   <head>
-    <meta charset='utf-8'>
+	<meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width,maximum-scale=2">
+	<meta name="viewport" content="width=device-width,maximum-scale=2">
     <meta name="description" content="{{ site.title | default: site.github.repository_name }} : {{ site.description | default: site.github.project_tagline }}">
+	<link rel="canonical" href="{{ site.url }}{{ site.baseurl }}/">
+	<link rel="shortcut icon" type="image/png" href="./assets/images/AP_Icon128.png">
     <link rel="stylesheet" type="text/css" media="screen" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
-    <title>{{ site.title | default: site.github.repository_name }}</title>
+
+	<title>{{ site.title | default: site.github.repository_name }}</title>
  
 	<!-- Social media -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+	<script>window.twttr = (function(d, s, id) {
+  		var js, fjs = d.getElementsByTagName(s)[0],
+    	t = window.twttr || {};
+  		if (d.getElementById(id)) return t;
+  		js = d.createElement(s);
+  		js.id = id;
+  		js.src = "https://platform.twitter.com/widgets.js";
+  		fjs.parentNode.insertBefore(js, fjs);
+  		t._e = [];
+  		t.ready = function(f) {
+    	t._e.push(f);
+  		};
+  		return t;
+		}
+		(document, "script", "twitter-wjs"));
+	 </script>
 	<meta name="twitter:card" value="summary" />
-	<meta name="twitter:site" value="@{{ site.github.owner_name }}" />
+	<meta name="twitter:site" value="@necropola" />
+	<meta name="twitter:site:id" value="@necropola" />
+	<meta name="twitter:creator" value="@necropola" />
 	<meta name="twitter:title" value="{{ site.title | default: site.github.repository_name }}" />
 	<meta name="twitter:description" value="{{ site.title | default: site.github.repository_name }} : {{ site.description | default: site.github.project_tagline }}" />
-    <meta name="twitter:image" content="{{ site.url }}{{ site.baseurl }}/assets/images/AudioPick-Preview-900x900.png" />
+    <meta name="twitter:image" content="{{ site.url }}{{ site.baseurl }}/assets/images/AudioPick-Preview-920x920.png" />
     <meta property="og:title" content="{{ site.title | default: site.github.repository_name }}" />
-    <meta property="og:type" content="article" />
+    <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ site.url }}{{ site.baseurl }}/" />
-    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/images/AudioPick-Preview-900x900.png" />
+    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/images/AudioPick-Preview-920x920.png" />
     <meta property="og:description" content="{{ site.title | default: site.github.repository_name }} : {{ site.description | default: site.github.project_tagline }}" /> 
 	{% if site.google_analytics %}
 	<!-- Google Analytics -->
@@ -44,6 +65,23 @@
           <h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
           <h2 id="project_tagline">{{ site.description | default: site.github.project_tagline }}</h2>
 
+			<div style="display:flex;justify-content: space-between;">
+				<div class="g-plus" data-annotation="none" data-action="share" style="witdh:auto%;"></div>
+				<!-- <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" -->
+				<form action="." method="get" target="_self"
+						style="visibility:hidden;width:25%;background-color:transparent;text-align:center;margin:0;padding:0;">
+					<input type="hidden" name="cmd" value="_s-xclick" />
+					<input type="hidden" name="hosted_button_id" value="HHXMZN5FWW4JA" />
+					<input type="image" src="./assets/images/AP1EUR-360x60.png" style="width:100%;" border="0" name="submit"
+						   alt="PayPal +1&euro; to support us" title="PayPal +1&euro; to support us"/>
+				</form>
+				<a class="twitter-share-button" style="width:auto;"
+					href="https://twitter.com/share"
+				    data-text="#AudioPick"
+				    data-via="necropola"
+				   	data-url="{{ site.url }}{{ site.baseurl }}/">Share</a>
+			</div> <!-- href="https://twitter.com/intent/tweet" -->
+			
           {% if site.show_downloads %}
             <section id="downloads">
               <a class="zip_download_link" href="{{ site.github.zip_url }}">Download this project as a .zip file</a>
@@ -57,16 +95,19 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
         {{ content }}
+		<div style="margin-left:auto; margin-right:0; margin-top:-28%; text-align:right;">
+		 	<a href="https://chrome.google.com/webstore/detail/audiopick/gfhcppdamigjkficnjnhmnljljhagaha"><img src="./assets/images/AudioPick-920x680.png" style="width:30%;" alt="AudioPick Extension on Chrome Webstore" title="AudioPick Extension on Chrome Webstore"/></a>
+		</div>	
       </section>
     </div>
 
     <!-- FOOTER  -->
     <div id="footer_wrap" class="outer">
       <footer class="inner">
-        {% if site.github.is_project_page %}
-        <p class="copyright">{{ site.title | default: site.github.repository_name }} maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
-        {% endif %}
-        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+        	{% if site.github.is_project_page %}
+        	<p class="copyright">{{ site.title | default: site.github.repository_name }} maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
+        	{% endif %}
+        	<p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
   </body>
