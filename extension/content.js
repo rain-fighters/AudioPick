@@ -152,7 +152,7 @@ function update_all_sinks() {
 		promises.push(allMedia[j].setSinkId(sink_id));
 	}
 	if (promises.length > 0) {
-		log('Tyring to update all (' + promises.length + ') sinks (GUM_state == ' + GUM_state + '): ' + sink_id);
+		log('Trying to update all (' + promises.length + ') sinks (GUM_state == ' + GUM_state + '): ' + sink_id);
 		Promise.all(promises)
 			.then(function(results){log('All set.'); })
 			.catch(function(error){
