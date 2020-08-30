@@ -11,6 +11,6 @@ need to be manipulated which - as a result - creates entries under `contentSetti
 it allows those sites to access your microphone.
  
 ## Links
-- [AudioPick Extension on Chrome Webstore](https://chrome.google.com/webstore/detail/audiopick/gfhcppdamigjkficnjnhmnljljhagaha)
+- [Rain-Fighters](https://rain-fighters.github.io/)
 - [AudioPick Source on GitHub](https://github.com/rain-fighters/AudioPick)
-- [AudioPick Issues on GitHub](https://github.com/rain-fighters/AudioPick/issues)
+- [AudioPick Extension on Chrome Webstore](https://chrome.google.com/webstore/detail/audiopick/gfhcppdamigjkficnjnhmnljljhagaha)
