@@ -11,58 +11,6 @@
 
 	<title>{{ site.title | default: site.github.repository_name }}</title>
  
-	<!-- Social media -->
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-	<script>window.twttr = (function(d, s, id) {
-  		var js, fjs = d.getElementsByTagName(s)[0],
-    	t = window.twttr || {};
-  		if (d.getElementById(id)) return t;
-  		js = d.createElement(s);
-  		js.id = id;
-  		js.src = "https://platform.twitter.com/widgets.js";
-  		fjs.parentNode.insertBefore(js, fjs);
-  		t._e = [];
-  		t.ready = function(f) {
-    	t._e.push(f);
-  		};
-  		return t;
-		}
-		(document, "script", "twitter-wjs"));
-	 </script>
-	<meta name="twitter:card" value="summary" />
-	<meta name="twitter:site" value="@necropola" />
-	<meta name="twitter:site:id" value="@necropola" />
-	<meta name="twitter:creator" value="@necropola" />
-	<meta name="twitter:title" value="{{ site.title | default: site.github.repository_name }}" />
-	<meta name="twitter:description" value="{{ site.title | default: site.github.repository_name }} : {{ site.description | default: site.github.project_tagline }}" />
-    <meta name="twitter:image" content="{{ site.url }}{{ site.baseurl }}/assets/images/AudioPick-Preview-960x960.png" />
-    <meta property="og:title" content="{{ site.title | default: site.github.repository_name }}" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="{{ site.url }}{{ site.baseurl }}/" />
-    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/images/AudioPick-Preview-960x960.png" />
-    <meta property="og:description" content="{{ site.title | default: site.github.repository_name }} : {{ site.description | default: site.github.project_tagline }}" /> 
-	{% if site.google_analytics %}
-	<!-- Google Analytics -->
- 	<script type="text/javascript">
-		function getUserConsentState() {
-			return false;
-		}
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-        ga('create', '{{ site.google_analytics }}', 'auto');
-		ga('set' 'forceSSL', true);
-		if (getUserConsentState() == true) {
-			ga('require', 'displayfeatures');
-			ga('set', 'anonymizeIp', undefined);
-		} else {
-			ga('set', 'displayfeatures', null);
-			ga('set', 'anonymizeIp', true);
-		}
-        ga('send', 'pageview');
-  	</script>
-	{% endif %}
 	{% seo %}
   </head>
 
@@ -79,24 +27,6 @@
 			
           <h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
           <h2 id="project_tagline" style="width:75%;">{{ site.description | default: site.github.project_tagline }}</h2>
-
-			<div style="display:flex;justify-content: space-between;">
-				<div class="g-plus" data-annotation="bubble" data-height="24" data-action="share" style="witdh:auto%;"></div>
-				<!-- <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top" -->
-				<form action="." method="get" target="_self"
-						style="visibility:hidden;width:auto;background-color:transparent;text-align:center;margin:0;padding:0;">
-					<input type="hidden" name="cmd" value="_s-xclick" />
-					<input type="hidden" name="hosted_button_id" value="HHXMZN5FWW4JA" />
-					<input type="image" src="./assets/images/AP1EUR-360x60.png" style="height:28px;" border="0" name="submit"
-						   alt="PayPal +1&euro; to support us" title="PayPal +1&euro; to support us"/>
-				</form>
-				<a class="twitter-share-button" style="width:auto;"
-					href="https://twitter.com/share"
-				   	data-size="large"
-				    data-text="#AudioPick"
-				    data-via="necropola"
-				   	data-url="{{ site.url }}{{ site.baseurl }}/">Tweet</a>
-			</div> <!-- href="https://twitter.com/intent/tweet" -->
 			
           {% if site.show_downloads %}
             <section id="downloads">
