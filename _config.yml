@@ -1,8 +1,13 @@
 theme: jekyll-theme-slate
-google_analytics: UA-79450771-1
 google_site_verification: D5ixU_08KXu4tDMaycnskWkUtkC3kO5oKSb6NTsfXPE
 
 gems:
   - jekyll-mentions
   - jekyll-sitemap
   - jekyll-seo-tag
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: /assets/images/audiopick-preview-940x940.png
