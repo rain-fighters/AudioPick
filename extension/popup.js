@@ -108,6 +108,12 @@ function input_onchange(e) {
 	);
 };
 
+chrome.browserAction.onClicked.addListener(function(tab) {
+	navigator.mediaDevices.enumerateDevices()
+		.then(update_device_popup)
+		.catch(errorCallback);
+});
+
 // -- main ---------------------------------------------------------------
 init();
 
