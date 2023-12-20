@@ -1,6 +1,8 @@
 # AudioPick
 A *Chrome Extension* to pick a default audio output device for HTML5 audio and video elements
 
+**THIS IS THE NEW BRANCH FOR MANIFEST V3 (0.3.X VERSIONS)**
+
 ## How it works
 The extension finds HTML5 audio and video elements within the document tree and manipulates the `sinkId` in order
 to switch to the desired audio output device. The extension does not and will never find flash objects.
