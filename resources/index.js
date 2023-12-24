@@ -25,3 +25,19 @@ function add_visible_audio() {
 		div.appendChild(audio);
 	}
 }
+
+function add_visible_shadow_audio() {
+	var div = document.getElementById("even_more_audio");
+	var audio = document.getElementById('visible_shadow_audio');
+	if (audio) {
+		audio.loop = true;
+		audio.play();
+	} else {
+		audio = document.createElement('AUDIO');
+		audio.id = "visible_audio";
+		audio.src = "./WebRTC/audio/audio.mp3";
+		audio.controls = true;
+		var s = div.attachShadow({ mode: "closed" });
+		s.appendChild(audio);
+	}
+}

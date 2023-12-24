@@ -1,109 +1,222 @@
-'use strict';
+// Default entry and prefix used for our local storage variables.
+const storageString = "defaultDevice";
+// Assume all devices are the system default until proven otherwise.
+var domainDevice = "default";
+var defaultDevice = "default";
+var activeDevice = "default";
+var activeTab;
+var domainString;
 
-var bg = chrome.extension.getBackgroundPage();
-var default_no = bg.document.getElementById("default_no");
-var sink_no = default_no.value;
+// Sets microphone access using contentSettings API.
+async function setMicAccess(pattern, value) {
+	await chrome.contentSettings.microphone.set({
+		primaryPattern: pattern,
+		scope: (
+			activeTab.incognito
+			? "incognito_session_only"
+			: "regular"
+		),
+		setting: value
+	});
+	return true;
+}
 
-// -- Update the temporary device selection page
- function init() {
-	log('init');
- 	chrome.tabs.query({active: true, currentWindow: true},
-		function(tabs) {
-			var activeTab = tabs[0];
-			log('Sending message: report_sink_no');
-			chrome.tabs.sendMessage(activeTab.id,
-				{"message": "report_sink_no"},
-				{'frameId': 0}, // only request from main frame
-				function(response) {
-					if (response) {
-						log("Received Response: " + response.sink_no);
-						sink_no = response.sink_no;
-					}
-					navigator.mediaDevices.enumerateDevices()
-						.then(update_device_popup)
-						.catch(errorCallback);
-				}
-			);
+// Click handler used for all buttons on the pop-up.
+function button_OnClick(e) {
+	// Check which device has been selected.
+	var selected = document.querySelectorAll("input[type='radio']:checked")[0];
+	// Create domain pattern in case we need to set Mic access.
+	var micPattern = activeTab.url.split("/")[0] + "//";
+	micPattern = micPattern + activeTab.url.split("/")[2] + "/*";
+	if (selected.id === "default") {
+		// If the default device is selected we don't need Mic access.
+		// Set permission for site back to "ask".
+		setMicAccess(micPattern, "ask");
+	}
+	if (selected.id === "default" || selected.id === "communications") {
+		// If the default audio or comms device was selected we use their ID.
+		// This avoids mismatches when they change defaults.
+		activeDevice = selected.id;
+	} else {
+		// If a non-default device was selected use the device label.
+		// Allows us to select the right device between tabs when IDs change.
+		activeDevice = selected.value;
+	}
+	// Tell the active tab to set the newly selected active device.
+	chrome.tabs.sendMessage(activeTab.id, {
+		action: "setActiveDevice",
+		device: activeDevice
+	}).then(function () {
+		// If we're here because the user clicked a save button then
+		// we should save the selection to the relevant local storage.
+		switch (e.target.id) {
+		case "saveDefault":
+			chrome.storage.local.set({[storageString]: activeDevice });
+			break;
+		case "saveSite":
+			chrome.storage.local.set({[domainString]: activeDevice });
+			break;
 		}
-	)
+		// Close the pop-up now that a selection has been made.
+		window.close();
+	});
 }
 
-function errorCallback(error) {
-	log('error: ', error);
-}
-
-function log(message) {
-	// logging to background console
-	bg.console.log('popup: ' +  message);
-}
-
-function update_device_popup(deviceInfos) {
-	log('update_device_popup: ' + deviceInfos.length + ' device(s) total (audio/video input/output)');
-	var div = document.getElementById("device_options");
-	var select = bg.document.getElementById("device_cache");
-	while (div.firstChild) { div.removeChild(div.firstChild); }
-	for (var i = 0; i !== deviceInfos.length; ++i) {
-		var kind = deviceInfos[i].kind;
-		var id = deviceInfos[i].deviceId;
-		var text = deviceInfos[i].label;
-		//log('device: ' + id + ' - ' + text);
-		if (kind === 'audiooutput') {
-			if (id == "default") {
-				text = "System Default Device";
-			} else if (id == "communications") {
-				text = "System Default Communications Device";
-			}
-			var option = bg.document.getElementById(id);
-			if (!text) {
-				if (option && option.value) {
-					text = option.value;
-				} else {
-					text = id;
-				}
-			}
-			if (option) {
-				option.value = text;
-			} else {
-				option = bg.document.createElement("option");
-				option.id = id;
-				option.value = text;
-				select.appendChild(option);
-			}
-			var input = document.createElement("input");
-			input.type= "radio";
-			input.name = "device";
-			input.id = id;
-			input.value = i;
-			input.onchange = function(e){input_onchange(e);};
-			var textNode = document.createTextNode(text);
-			var label = document.createElement("label");
-			if (i == sink_no) {
-				log('current default_no: ' + i + ' - ' + id + ' - ' + text);
-				input.checked = true;
-			}
-			label.appendChild(textNode);
-			label.appendChild(input);
-			div.appendChild(label);
+// Build the elements for our popup from the list of devices.
+function buildDeviceList(mediaDeviceInfo) {
+	var activeExists = false;
+	var domainExists = false;
+	var defaultExists = false;
+	// Select the element from the HTML we will use as our parent.
+	var mainElement = document.getElementById("device_options");
+	// Check if any of the active/domain default/default devices exist.
+	mediaDeviceInfo.every(function (device) {
+		activeExists = (!activeExists && (
+			(
+				device.label === activeDevice
+			) || (
+				device.deviceId === activeDevice
+			)
+		));
+		domainExists = (!domainExists && (
+			(
+				device.label === domainDevice
+			) || (
+				device.deviceId === domainDevice
+			)
+		));
+		defaultExists = (!defaultExists && (
+			(
+				device.label === defaultDevice
+			) || (
+				device.deviceId === defaultDevice
+			)
+		));
+		return !activeExists;
+	});
+	// Use saved device in order of preference (active > domain > default).
+	if (!activeExists) {
+		if (domainExists) {
+			activeDevice = domainDevice;
+		} else if (defaultExists) {
+			activeDevice = defaultDevice;
+		} else {
+			activeDevice = "default";
 		}
 	}
+	// Remove any existing children from parent.
+	mainElement.childNodes.forEach((node) => node.remove());
+	// Generate our device entries.
+	mediaDeviceInfo.forEach(function (device) {
+		var desc;
+		var radioElement = document.createElement("input");
+		var labelElement = document.createElement("label");
+		var textNode = document.createTextNode("");
+		// Filter out input devices.
+		if (device.kind === "audiooutput") {
+			radioElement.type = "radio";
+			radioElement.name = "device";
+			radioElement.id = device.deviceId;
+			switch (device.deviceId) {
+			// Make standard label for default devices & use provided for rest.
+			case "default":
+				desc = "Default Audio Device";
+				break;
+			case "communications":
+				desc = "Default Communications Device";
+				break;
+			default:
+				desc = device.label;
+			}
+			// We use the device label as the identifier we pass to the tab.
+			radioElement.value = device.label;
+			// Bold the entry for the active device for a visual indicator.
+			if (
+				(
+					device.label === activeDevice
+				) || (
+					device.deviceId === activeDevice
+				)
+			) {
+				radioElement.checked = true;
+				labelElement.style.fontWeight = "bold";
+			}
+			// The default device for the domain is purple and italic.
+			if (
+				(
+					device.label === domainDevice
+				) || (
+					device.deviceId === domainDevice
+				)
+			) {
+				labelElement.style.fontStyle = "italic";
+				labelElement.style.color = "purple";
+			}
+			// The default device for the extension is just italic.
+			if (
+				(
+					device.label === defaultDevice
+				) || (
+					device.deviceId === defaultDevice
+				)
+			) {
+				labelElement.style.fontStyle = "italic";
+			}
+			// Set text and append elements.
+			textNode.textContent = desc;
+			labelElement.appendChild(radioElement);
+			labelElement.appendChild(textNode);
+			mainElement.appendChild(labelElement);
+		}
+	});
+	// Set the onClick handler for all buttons on the page.
+	Array.from(document.getElementsByTagName("button")).forEach(function (e) {
+		e.onclick = button_OnClick;
+	});
 }
 
-function input_onchange(e) {
-	//log('browser_action Commit');
-	var sink_no = e.target.value;	
-	chrome.tabs.query({active: true, currentWindow: true},
-		function(tabs) {
-			var activeTab = tabs[0];
-			log('Sending message: browser_action_commit, sink_no: ' + sink_no);
-			chrome.tabs.sendMessage(activeTab.id, { // send to all frames without using options = {'frameId': N}
-				"message": "browser_action_commit",
-				"sink_no":  sink_no
-			});
-			window.close();
-		}
+async function init() {
+	// Get the current active / calling tab.
+	[activeTab] = await chrome.tabs.query({
+		active: true,
+		currentWindow: true
+	});
+	// If we're not on http or https immediately close.
+	// Extension doesn't like to work on chrome:// or file:// URLs.
+	if (activeTab.url.toLowerCase().indexOf("http") === -1) {
+		window.close();
+		return;
+	}
+	// Generate domain storage name from tab URL.
+	domainString = storageString + "_" + activeTab.url.split("/")[2];
+	// Retreive domain and extension default settings if they exist.
+	const storage = await chrome.storage.local.get(
+		[storageString, domainString]
 	);
-};
+	// Save stored results for later and set preferred defaults.
+	if (storage.defaultDevice) {
+		defaultDevice = storage.defaultDevice;
+		activeDevice = defaultDevice;
+	}
+	if (storage[domainString]) {
+		domainDevice = storage[domainString];
+		activeDevice = domainDevice;
+	}
+	// Get the active device from the current tab.
+	const response = await chrome.tabs.sendMessage(
+		activeTab.id,
+		{action: "getActiveDevice"}
+	);
+	if (response) {
+		activeDevice = response;
+	}
+	// Set our extensions microphone access permissions so we can
+	// access non-default audio devices when we list them.
+	await setMicAccess("*://" + chrome.runtime.id + "/*", "allow");
+	// Get the current list of audio devices.
+	const deviceList = await navigator.mediaDevices.enumerateDevices();
+	// Build pop-up interface.
+	buildDeviceList(deviceList);
+}
 
-// -- main ---------------------------------------------------------------
 init();
-

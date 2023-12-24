@@ -1,172 +1,129 @@
-'use strict';
+// Default entry and prefix used for our local storage variables.
+const storageString = "defaultDevice";
+// Assume active device is system default until proven otherwise.
+var activeDevice = "default";
+var activeSinkId;
 
-var sink_no = 0;
-var sink_id = 'default';
-var frame_url = location.protocol + '//'+ location.host + location.pathname;
-var frame_depth = get_depth(window.self);
-var GUM_state = undefined;
+// Message handler.
+// Messages are expected in the format {action: value, ...}
+function onMessage(request, sender, sendResponse){
+	switch(request.action){
+		case "setActiveDevice":
+			// The extension pop-up is asking us to set a new active device.
+			setAudioDevice(request.device);
+			break;
+		case "getActiveDevice":
+			// The exension pop-up or a child of this tab is asking for the
+			// current active device. Only respond if we're the top.
+			if (window === top)
+			{
+				sendResponse(activeDevice);
+				return true;
+			}
+			break;
+		case "getActiveSinkId":
+			// A child of this tab is asking for the current active sinkId.
+			// Only respond if we're the top.
+			if (window === top)
+			{
+				sendResponse(activeSinkId);
+				return true;
+			}
+			break;
+	}
+}
 
-/*
- * undefined == wait with getUserMedia() until we know that we actually need to call setSinkId 
- *         0 == last call to setSinkId failed. Going to call getUserMedia() next time
- *         1 == getUserMedia() succeeded 
- *        -1 == getUserMedia() failed 
- */
+// Send the new/selected sinkId to the script in MAIN.
+async function injectSinkId(){
+	// If we're setting the device to something non-default get Mic access.
+	if (activeSinkId !== "default") {
+		await chrome.runtime.sendMessage({
+			action: "setMicAccess", value: "allow"
+		});
+	}
+	// Send the message to our worker to inject the sinkId and apply.
+	await chrome.runtime.sendMessage({action: "injectSink", value: activeSinkId});
+}
 
-function get_depth(w) {
-	if (w.parent == w) {
-		return 0;
+// Set the specified device as the audio sink for all elements.
+async function setAudioDevice(deviceName){
+	var mediaDeviceInfo;
+	var sinkId = "default";
+	// If the target device is the system default skip straight to applying.
+	if (deviceName !== "default"){
+		// If we're setting it to anything other than the system default
+		// make sure we have microphone access before we proceed.
+		await chrome.runtime.sendMessage(
+			{
+				action: "setMicAccess", value: "allow"
+			}
+		);
+		// Get the current list of audio devices.
+		mediaDeviceInfo = await navigator.mediaDevices.enumerateDevices();
+		mediaDeviceInfo.every(function (device) {
+			// Skip any audio input devices or devices without deviceIds.
+			if ((device.kind === "audiooutput" && device.deviceId) && (
+				// If the device label or device id matches our device name
+				// then set our sinkId to the deviceId.
+				(
+					device.label === deviceName
+				) || (
+					device.deviceId === deviceName
+				)
+			)) {
+				sinkId = device.deviceId;
+				return false;
+			}
+			return true;
+		});
+	}
+	// Set our selected sinkId as the active.
+	activeSinkId = sinkId;
+	// Set the active device name to the sinkId for default devices.
+	// Set it to the device label/name otherwise.
+	if (sinkId === "default" || sinkId === "communications")
+		{activeDevice = sinkId;}
+	else
+		{activeDevice = deviceName;}
+	// Update all elements on the page with the new sinkId.
+	injectSinkId();
+	return true;
+}
+
+async function init(){
+	// If we're top read settings from storage and set the active device.
+	if (window === top){
+		// Get our domain string prefix from the worker.
+		const domainString = await chrome.runtime.sendMessage(
+				{
+						action: "getDomainString"
+				}
+		);
+		// Get any stored values.
+		const storage = await chrome.storage.local.get(
+				["defaultDevice", domainString]
+		);
+		// Apply stored values if present.
+		if (storage.defaultDevice) {activeDevice = storage.defaultDevice;}
+		if (storage[domainString]) {activeDevice = storage[domainString];}
+		await setAudioDevice(activeDevice);
+	// If not top request the current active device info from top via worker.
+	// Set sinkId on all children.
 	} else {
-		return 1 + get_depth(w.parent);
-	}
-}
-
-function log(message) {
-	console.log('  '.repeat(frame_depth) + 'AudioPick(' + frame_url + '): ' + message);
-}
-
-function errorCallback(error) {
-	log('Error: '+ error);
-}
-
-// -- Register a listener for messages from the popup page
-function register_message_listener() {
-	chrome.runtime.onMessage.addListener(
-		function(request, sender, sendResponse) {
-			if (request.message === "browser_action_commit" ) {
-				log('Received message: browser_action_commit, sink_no: ' + request.sink_no);
-				if (request.sink_no != undefined) {
-					sink_no = request.sink_no;
-					get_devices();
+		activeSinkId = await chrome.runtime.sendMessage(
+				{
+						action: "getActiveSinkId"
 				}
-			} else if (request.message == "report_sink_no") {
-				log('Received message: report_sink_no');
-				log('Reply with: sink_no: ' + sink_no);
-				sendResponse({'sink_no': sink_no});
-			}
-		}
-	)
-}
-
-// -- Register a Mutation Observer to monitor changes and additions of <audio/> and <video/> elements
-function register_observer() {
-	var observer = new MutationObserver(
-		function(mutations) {
-			var nodes_added = 0;
-			mutations.forEach(
-				function(mutation) {
-					for (var i = 0; i < mutation.addedNodes.length; i++) {
-						if (check_node(mutation.addedNodes[i])) nodes_added++;
-					}
+		);
+		activeDevice = await chrome.runtime.sendMessage(
+				{
+						action: "getActiveDevice"
 				}
-			);
-			if (nodes_added > 0) {
-				log('Updating sinks for new AUDIO/VIDEO nodes: ' + nodes_added);
-				update_all_sinks();
-			}
-		}
-	);
-	observer.observe(document.documentElement, {
-		childList: true,
-		subtree: true,
-		attributes: false,
-		characterData: false
-	});
-}
-
-function check_node(node) {
-	var name = node.nodeName;
-	var attributes = node.attributes
-	if ((name == 'AUDIO') || (name == 'VIDEO')) {
-		log('node added: ' + name);
-		return true;
+		);
+		injectSinkId();
 	}
-	return false;
+	// Start listening for messages.
+	chrome.runtime.onMessage.addListener(onMessage);
 }
 
-// -- Request the default sink_no from the background
-function request_default_no() {
-	log('Requesting default_no ...');
-	chrome.runtime.sendMessage({'method': 'AP_get_default_no'},
-		function(response) {
-			if (response) {
-				log('Received default_no: ' + response.default_no);
-				sink_no = response.default_no;
-				get_devices();
-			}
-		}
-	)
-}
-
-function get_devices() {
-	navigator.mediaDevices.enumerateDevices()
-		.then(inspect_devices)
-		.catch(errorCallback);
-}
-
-function inspect_devices(deviceInfos) {
-	log('Inspecting Devices: ' + deviceInfos.length + ' device(s) total (audio/video input/output)');
-	for (var i = 0; i != deviceInfos.length; i++) {
-		var deviceInfo = deviceInfos[i];
-		//log('  Devices[' + i + ']: ' + deviceInfo.kind + ': ' + deviceInfo.deviceId);
-		if ((deviceInfo.kind == 'audiooutput') && (i == sink_no)) {
-			log('Selecting Devices[' + i + ']: ' + deviceInfo.deviceId);
-			sink_id = deviceInfo.deviceId;
-		}
-	}
-}
-
-function request_help_with_GUM() {
-	chrome.runtime.sendMessage({'method': 'AP_help_with_GUM', 'primaryPattern': location.protocol + '//'+ location.host + '/*'},
-		function(response) {
-			if (response) {
-				log('Received result: ' + response.result);
-				GUM_state = 1;
-				update_all_sinks();
-			}
-		}
-	);
-}
-
-function with_or_without_GUM() {
-	if (GUM_state == 0) {
-		request_help_with_GUM();
-	} else {
-		update_all_sinks();
-	}
-}
-
-function update_all_sinks() {
-	var promises = [];
-	var allMedia = document.querySelectorAll('audio,video');
-	for (var j = 0; j < allMedia.length; j++) {
-		var name = allMedia[j].nodeName;
-		var src = allMedia[j].currentSrc;
-		log('  Queuing SetSinkId: ' + j + ': ' + name + ': ' +  src + ': ' + sink_id);
-		promises.push(allMedia[j].setSinkId(sink_id));
-	}
-	if (promises.length > 0) {
-		log('Trying to update all (' + promises.length +
-			') sinks (GUM_state == ' + GUM_state + '): ' + sink_id);
-		Promise.all(promises)
-			.then(function(results){log('All set.'); })
-			.catch(function(error){
-				if (GUM_state == undefined) {
-					GUM_state = 0;
-					log('SetSinkId failed: ' + error + '. Retrying with GUM ...');
-					with_or_without_GUM();
-				} else {
-					log('SetSinkId failed: ' + error + '.  Giving up.');
-				}
-			});
-		} else {
-		log('No sinks found');
-	}
-}
-
-// -- main ---------------------------------------------------------------
-register_message_listener();
-request_default_no();
-register_observer();
-setInterval(update_all_sinks,5000);
-
+init();
