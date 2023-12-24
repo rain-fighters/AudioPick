@@ -1,3 +1,9 @@
+// Main script handles:
+// 1) Hooking Document.createElement(), Element.attachShadow(), and HTMLMediaElement.play().
+// 2) Monitoring the creation of new elements with a MutationObserver.
+// 3) Applying the activeSinkId to AUDIO and VIDEO elements.
+// Main script runs in WORLD:MAIN.
+//
 // Observer function that will be called for any new nodes or shadowRoots.
 const observer = new MutationObserver(function (mutations) {
 	// Check each mutation to see if nodes have been added.
@@ -65,7 +71,8 @@ function hookElement_attachShadow()
 	};
 }
 
-// Hook HTMLMediaElement.prototype.play so we catch any elements not added to the DOM.
+// Hook HTMLMediaElement.prototype.play to catch any elements that
+// already exist outside of the DOM.
 function hookHTMLMediaElement_play()
 {
 	// Don't double-hook if we already did in this context.
@@ -74,7 +81,23 @@ function hookHTMLMediaElement_play()
 		// Save the original function for callback.
 		HTMLMediaElement.prototype.play_noHook = HTMLMediaElement.prototype.play;
 	}
+	// Set our hook
 	HTMLMediaElement.prototype.play = function(...args) {
+		// Save self-reference for use inside listener callback.
+		// Otherwise "this" is window inside the listener.
+		var thisElement = this;
+		// Only create a new listener if we don't have one already.
+		if (typeof(thisElement.sinkListener) !== "function") {
+			thisElement.sinkListener = function (e) {
+				// Only try to set the sinkId if we have an activeSinkId already.
+				if (top.activeSinkId) {
+					thisElement.setSinkId(top.activeSinkId);
+				}
+			}
+			// Add event listener to top for ease of event management.
+			top.addEventListener("changeSinkId", this.sinkListener, true);
+		}
+
 		// Only try to set the sinkId if we have an activeSinkId already.
 		if (top.activeSinkId) {
 			this.setSinkId(top.activeSinkId);

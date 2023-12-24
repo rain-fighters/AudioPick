@@ -1,6 +1,8 @@
-// Our worker exists for two reasons only:
-// 1. To provide microphone access to our content script for basic function.
-// 2. To relay messages from any frames/iframes/children back to the main tab.
+// Worker script handles:
+// 1) Providing microphone access to our content script for basic function.
+// 2) Relaying messages from any frames/iframes/children back to the main tab.
+// 3) Injecting sinkId changes into WORLD:MAIN.
+// Worker runs in BACKGROUND.
 function onMessage(request, sender, sendResponse) {
 	switch (request.action) {
 	case "getDomainString":
@@ -9,8 +11,18 @@ function onMessage(request, sender, sendResponse) {
 		break;
 	case "getActiveSinkId":
 	case "getActiveDevice":
+		// Create a proxy response function to catch errors that can happen
+		// when one of the non-top content scripts loads before top is done.
+		var responder = function (...args){
+			if (args.length === 0)
+			{
+				console.log(chrome.runtime.lastError);
+			} else {
+				sendResponse.apply(this, args);
+			}
+		}
 		// Relay the message to the top-level content script.
-		chrome.tabs.sendMessage(sender.tab.id, request, sendResponse);
+		chrome.tabs.sendMessage(sender.tab.id, request, responder);
 		break;
 	case "getMicAccess":
 		// Return the current microphone access permissions for tab.
@@ -46,6 +58,7 @@ function onMessage(request, sender, sendResponse) {
 			args : [request.value],
 			func : function (activeSinkId) {
 				top.activeSinkId = activeSinkId;
+				top.dispatchEvent(new CustomEvent("changeSinkId"));
 				setAllSinks();
 			},
 			target : {tabId : sender.tab.id},

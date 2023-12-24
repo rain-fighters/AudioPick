@@ -1,3 +1,8 @@
+// Content script handles:
+// 1) Loading and applying saved devices.
+// 2) Listening for device change messages from popup/worker.
+// Content script runs in WORLD:ISOLATED.
+//
 // Default entry and prefix used for our local storage variables.
 const storageString = "defaultDevice";
 // Assume active device is system default until proven otherwise.
@@ -41,8 +46,15 @@ async function injectSinkId(){
 			action: "setMicAccess", value: "allow"
 		});
 	}
-	// Send the message to our worker to inject the sinkId and apply.
-	await chrome.runtime.sendMessage({action: "injectSink", value: activeSinkId});
+	// If we have an activeSinkId.
+	if (activeSinkId) {
+		// Send the message to our worker to inject the sinkId and apply.
+		await chrome.runtime.sendMessage({
+			action: "injectSink",
+			value: activeSinkId
+		});
+	}
+	return true;
 }
 
 // Set the specified device as the audio sink for all elements.
@@ -86,11 +98,13 @@ async function setAudioDevice(deviceName){
 	else
 		{activeDevice = deviceName;}
 	// Update all elements on the page with the new sinkId.
-	injectSinkId();
+	await injectSinkId();
 	return true;
 }
 
 async function init(){
+	// Start listening for messages.
+	chrome.runtime.onMessage.addListener(onMessage);
 	// If we're top read settings from storage and set the active device.
 	if (window === top){
 		// Get our domain string prefix from the worker.
@@ -120,10 +134,9 @@ async function init(){
 						action: "getActiveDevice"
 				}
 		);
-		injectSinkId();
+		await injectSinkId();
 	}
-	// Start listening for messages.
-	chrome.runtime.onMessage.addListener(onMessage);
+	return true;
 }
 
 init();
