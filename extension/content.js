@@ -19,21 +19,13 @@ function onMessage(request, sender, sendResponse){
 			break;
 		case "getActiveDevice":
 			// The exension pop-up or a child of this tab is asking for the
-			// current active device. Only respond if we're the top.
-			if (window === top)
-			{
-				sendResponse(activeDevice);
-				return true;
-			}
+			// current active device. Only respond if we're the window.
+			sendResponse(activeDevice);
 			break;
 		case "getActiveSinkId":
 			// A child of this tab is asking for the current active sinkId.
-			// Only respond if we're the top.
-			if (window === top)
-			{
-				sendResponse(activeSinkId);
-				return true;
-			}
+			// Only respond if we're the window.
+			sendResponse(activeSinkId);
 			break;
 	}
 }
@@ -103,10 +95,10 @@ async function setAudioDevice(deviceName){
 }
 
 async function init(){
-	// Start listening for messages.
-	chrome.runtime.onMessage.addListener(onMessage);
 	// If we're top read settings from storage and set the active device.
 	if (window === top){
+		// Start listening for messages.
+		chrome.runtime.onMessage.addListener(onMessage);
 		// Get our domain string prefix from the worker.
 		const domainString = await chrome.runtime.sendMessage(
 				{
@@ -121,9 +113,9 @@ async function init(){
 		if (storage.defaultDevice) {activeDevice = storage.defaultDevice;}
 		if (storage[domainString]) {activeDevice = storage[domainString];}
 		await setAudioDevice(activeDevice);
-	// If not top request the current active device info from top via worker.
-	// Set sinkId on all children.
 	} else {
+		// If not top request the current active device info from top via worker.
+		// Set sinkId on all children.
 		activeSinkId = await chrome.runtime.sendMessage(
 				{
 						action: "getActiveSinkId"
@@ -136,7 +128,7 @@ async function init(){
 		);
 		await injectSinkId();
 	}
-	return true;
+	return false;
 }
 
 init();

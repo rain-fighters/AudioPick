@@ -1,7 +1,7 @@
 // Main script handles:
-// 1) Hooking Document.createElement(), Element.attachShadow(), and HTMLMediaElement.play().
+// 1) Hooking AudioContext, Element, and HTMLMediaElement prototypes.
 // 2) Monitoring the creation of new elements with a MutationObserver.
-// 3) Applying the activeSinkId to AUDIO and VIDEO elements.
+// 3) Injecting a listener and applying the SinkId to VIDEO and AUDIO elements.
 // Main script runs in WORLD:MAIN.
 //
 // Observer function that will be called for any new nodes or shadowRoots.
@@ -14,6 +14,34 @@ const observer = new MutationObserver(function (mutations) {
 		});
 	});
 });
+
+// The function we call to initially add the eventListener and set the sinkId.
+// Can be called on any HTMLMediaElement or descendants.
+async function addListenerAndSetSinkId(targetElement) {
+	if (typeof(targetElement.sinkListener) !== "function") {
+		targetElement.sinkListener = function (e) {
+			if (
+					(targetElement.constructor === AudioContext) &&
+					(window.activeSinkId === "default")
+			) {
+				// If this element is an AudioContext and we're setting the sinkId
+				// to "default" instead set it to "".
+				targetElement.setSinkId("");
+			}
+			else
+			{
+				// Otherwise set the sinkId to the value provided by the event.
+				targetElement.setSinkId(e.detail);
+			}
+		}
+		// Add event listener to top for ease of event management.
+		window.addEventListener("changeSinkId", targetElement.sinkListener, true);
+	}
+	// Only try to set the sinkId if we have an activeSinkId already.
+	if (window.activeSinkId) {
+		targetElement.setSinkId(window.activeSinkId);
+	}
+}
 
 // Function to recursively set the sinkId on any audio/video elements.
 // It will recursively apply to all children and shadowRoots.
@@ -38,10 +66,10 @@ async function recursiveSetSinkId(node)
 	}
 	// If the current node is an audio/video node then set the sinkId.
 	if ((node.nodeName === "AUDIO") || (node.nodeName === "VIDEO")){
-		if (top.activeSinkId)
+		if (window.activeSinkId)
 		{
 			// Set the sinkId to our active device.
-			node.setSinkId(top.activeSinkId);
+			await addListenerAndSetSinkId(node);
 		}
 	}
 	// Process all children.
@@ -83,29 +111,47 @@ function hookHTMLMediaElement_play()
 	}
 	// Set our hook
 	HTMLMediaElement.prototype.play = function(...args) {
-		// Save self-reference for use inside listener callback.
-		// Otherwise "this" is window inside the listener.
-		var thisElement = this;
-		// Only create a new listener if we don't have one already.
-		if (typeof(thisElement.sinkListener) !== "function") {
-			thisElement.sinkListener = function (e) {
-				// Only try to set the sinkId if we have an activeSinkId already.
-				if (top.activeSinkId) {
-					thisElement.setSinkId(top.activeSinkId);
-				}
-			}
-			// Add event listener to top for ease of event management.
-			top.addEventListener("changeSinkId", this.sinkListener, true);
-		}
-
-		// Only try to set the sinkId if we have an activeSinkId already.
-		if (top.activeSinkId) {
-			this.setSinkId(top.activeSinkId);
-		}
+		addListenerAndSetSinkId(this);
 		// Pass the play request to the original function.
 		return this.play_noHook.apply(this, args);
 	};
 }
+
+// Hook all AudioContext.prototype create functions to catch any AudioContexts.
+function hookAudioContext_create()
+{
+	// Alias AudioContext.prototype to allow for shorter line length.
+	const AC = AudioContext.prototype;
+	// Don't double-hook if we already did in this context.
+	if (typeof(AC.createMediaElementSource_noHook) !== "function")
+	{
+		// Save the original functions for callback.
+		AC.createMediaElementSource_noHook = AC.createMediaElementSource;
+		AC.createMediaStreamSource_noHook = AC.createMediaStreamSource;
+		AC.createMediaStreamDestination_noHook = AC.createMediaStreamDestination;
+		AC.createMediaStreamTrackSource_noHook = AC.createMediaStreamTrackSource;
+	}
+	// Set our hooks
+	// Each hooked function simply calls addListenerAndSetSinkId on the object
+	// before calling and returning the value from the original function.
+	AC.createMediaElementSource = function(...args) {
+		addListenerAndSetSinkId(this);
+		return this.createMediaElementSource_noHook.apply(this, args);
+	};
+	AC.createMediaStreamSource = function(...args) {
+		addListenerAndSetSinkId(this);
+		return this.createMediaStreamSource_noHook.apply(this, args);
+	};
+	AC.createMediaStreamDestination = function(...args) {
+		addListenerAndSetSinkId(this);
+		return this.createMediaStreamDestination_noHook.apply(this, args);
+	};
+	AC.createMediaStreamTrackSource = function(...args) {
+		addListenerAndSetSinkId(this);
+		return this.createMediaStreamTrackSource_noHook.apply(this, args);
+	};
+}
+
 
 // Essentially document.querySelectorAll for shadowRoots.
 // Allows us to find any shadowRoots or children that were previously created.
@@ -122,38 +168,41 @@ document.queryShadowSelectorAll = function(selectors, e = document) {
 	shadowMap.forEach(function (shadow) {
 		var s = shadow.querySelectorAll(":host *");
 		if (s) {s.forEach(
-				function (el) {
-						results.push(el);
-				}
+			function (el) {
+				results.push(el);
+			}
 		);}
 	});
 	// Filter results to our selectors.
 	return results.filter(
-			function (r) {
-					return r.matches(selectors);
-			}
+		function (r) {
+			return r.matches(selectors);
+		}
 	);
 };
 
 // Set the sinkId on every existing audio/video element.
 // This will be called by our injected function.
-async function setAllSinks(){
+async function processAllMediaElements(){
 	var queue = [];
 	// Prepare to set sinkId on all audio/video nodes not in shadowRoots.
 	document.querySelectorAll("audio,video").forEach( function (node){
-		queue.push(node.setSinkId(top.activeSinkId));
+		queue.push(addListenerAndSetSinkId(node));
 	});
 	// Prepare to set sinkId on all audio/video nodes in shadowRoots.
 	document.queryShadowSelectorAll("audio,video").forEach(function (node){
-		queue.push(node.setSinkId(top.activeSinkId));
+		queue.push(addListenerAndSetSinkId(node));
 	});
 	// Process all located nodes.
-	await Promise.all(queue);
-	return true;
+	ret = await Promise.all(queue);
+	return ret;
 }
 
 // Load hooks first.
+hookAudioContext_create();
 hookHTMLMediaElement_play();
 hookElement_attachShadow();
 // Then start observing the document.
 observer.observe(document.documentElement, {childList: true,subtree: true});
+// Then process any existing media elements to set sinkId and add listener.
+processAllMediaElements();

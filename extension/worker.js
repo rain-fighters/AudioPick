@@ -53,20 +53,23 @@ function onMessage(request, sender, sendResponse) {
 		break;
 	case "injectSink":
 		// Inject the current sinkId for the requesting tab into MAIN.
-		// Then call setAllSinks() in MAIN to apply.
+		// Then dispatch a "changeSinkId" event to update all elements.
 		chrome.scripting.executeScript({
 			args : [request.value],
 			func : function (activeSinkId) {
-				top.activeSinkId = activeSinkId;
-				top.dispatchEvent(new CustomEvent("changeSinkId"));
-				setAllSinks();
+				window.activeSinkId = activeSinkId;
+				window.dispatchEvent(
+					new CustomEvent(
+						"changeSinkId",
+						{ detail: activeSinkId }
+					)
+				);
 			},
-			target : {tabId : sender.tab.id},
+			target : {tabId : sender.tab.id, allFrames : true},
 			world: "MAIN"
 		});
 		break;
 	}
-	return true;
 }
 
 // Start listening immediately.

@@ -5,19 +5,19 @@
 	"description": "Pick a default audio output device for HTML5 <audio/> and <video/> elements",
 	"author": "necropola@rain-fighters.net",
 	"homepage_url": "https://rain-fighters.github.io/AudioPick/",
-	"version": "0.3.7",
-	"version_name": "0.3.7",
+	"version": "0.3.8",
+	"version_name": "0.3.8",
 	"action": {
 		"default_icon": {
-	  "16": "AP_Icon16.png",
-	  "19": "AP_Icon19.png",
-	  "24": "AP_Icon24.png",
-	  "32": "AP_Icon32.png",
-	  "38": "AP_Icon38.png",
-	  "48": "AP_Icon48.png",
-	  "64": "AP_Icon96.png",
-	  "96": "AP_Icon96.png",
-	  "128": "AP_Icon128.png"
+			"16": "AP_Icon16.png",
+			"19": "AP_Icon19.png",
+			"24": "AP_Icon24.png",
+			"32": "AP_Icon32.png",
+			"38": "AP_Icon38.png",
+			"48": "AP_Icon48.png",
+			"64": "AP_Icon96.png",
+			"96": "AP_Icon96.png",
+			"128": "AP_Icon128.png"
 		},
 		"default_title": "AudioPick",
 		"default_popup": "popup.html"
@@ -33,10 +33,10 @@
 		"96": "AP_Icon96.png",
 		"128": "AP_Icon128.png"
 	},
-  "host_permissions": ["<all_urls>"],
-  "background": {
-	"service_worker": "worker.js"
-  },
+	"host_permissions": ["<all_urls>"],
+	"background": {
+		"service_worker": "worker.js"
+	},
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>"],
@@ -50,13 +50,10 @@
 			"world": "MAIN",
 			"all_frames" : true
 		}
-
 	],
 	"permissions": [
 		"contentSettings",
-		"activeTab",
 		"storage",
-		"tabs",
 		"scripting"
 	]
 }
