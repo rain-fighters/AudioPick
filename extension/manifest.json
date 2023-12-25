@@ -33,19 +33,19 @@
 		"96": "AP_Icon96.png",
 		"128": "AP_Icon128.png"
 	},
-	"host_permissions": ["<all_urls>"],
+	"host_permissions": ["https://*/*"],
 	"background": {
 		"service_worker": "worker.js"
 	},
 	"content_scripts": [
 		{
-			"matches": ["<all_urls>"],
+			"matches": ["https://*/*"],
 			"js": ["content.js"],
 			"world": "ISOLATED",
 			"all_frames" : true
 		},
 		{
-			"matches": ["<all_urls>"],
+			"matches": ["https://*/*"],
 			"js": ["main.js"],
 			"world": "MAIN",
 			"all_frames" : true

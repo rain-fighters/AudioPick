@@ -183,7 +183,7 @@ async function init() {
 	});
 	// If we're not on http or https immediately close.
 	// Extension doesn't like to work on chrome:// or file:// URLs.
-	if (activeTab.url.toLowerCase().indexOf("http") === -1) {
+	if (!activeTab.url || (activeTab.url.toLowerCase().indexOf("https") === -1)) {
 		window.close();
 		return;
 	}
