@@ -20,12 +20,10 @@ const observer = new MutationObserver(function (mutations) {
 async function addListenerAndSetSinkId(targetElement) {
 	if (typeof(targetElement.sinkListener) !== "function") {
 		targetElement.sinkListener = function (e) {
-			if (
-					(targetElement.constructor === AudioContext) &&
-					(window.activeSinkId === "default")
-			) {
-				// If this element is an AudioContext and we're setting the sinkId
-				// to "default" instead set it to "".
+			if (e.detail === "default") {
+				// If the sinkId is for the default device submit a blank string.
+				// AudioContext elements don't support "default" as a value.
+				// Non-AudioContext elements support both "default" and "".
 				targetElement.setSinkId("");
 			}
 			else
@@ -38,8 +36,16 @@ async function addListenerAndSetSinkId(targetElement) {
 		window.addEventListener("changeSinkId", targetElement.sinkListener, true);
 	}
 	// Only try to set the sinkId if we have an activeSinkId already.
-	if (window.activeSinkId) {
-		targetElement.setSinkId(window.activeSinkId);
+	if (typeof window.activeSinkId !== "undefined") {
+		if (window.activeSinkId === "default") {
+			// If the sinkId is for the default device submit a blank string.
+			// AudioContext elements don't support "default" as a value.
+			// Non-AudioContext elements support both "default" and "".
+			targetElement.setSinkId("");
+		} else {
+			// Otherwise set the sinkId to the value stored in global var.
+			targetElement.setSinkId(window.activeSinkId);
+		}
 	}
 }
 
@@ -66,11 +72,7 @@ async function recursiveSetSinkId(node)
 	}
 	// If the current node is an audio/video node then set the sinkId.
 	if ((node.nodeName === "AUDIO") || (node.nodeName === "VIDEO")){
-		if (window.activeSinkId)
-		{
-			// Set the sinkId to our active device.
-			await addListenerAndSetSinkId(node);
-		}
+		await addListenerAndSetSinkId(node);
 	}
 	// Process all children.
 	await Promise.all(queue);
