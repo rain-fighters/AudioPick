@@ -5,7 +5,7 @@ A **Chrome Manifest V3 Extension** to pick a preferred audio output device for *
 The extension finds **HTML5** `<audio/>` and `<video/>` elements within the document tree and manipulates the `sinkId` in order
 to switch to the preferred audio output device. Since version `0.3.X` it also finds audio/video objects (`new Audio(...)`) that have not been inserted into the document tree, e. g. **Spotify** and **SoundCloud** should now work with the extension, too.
 
-Since it's now possible to store/remember a preferred audio putput device per **domain**, the extension's **option panel** and hence the option to set a global preferred device (for the browser) has been removed.
+Since it's now possible to store/remember a preferred audio output device per **domain**, the extension's **option panel** and hence the option to set a global preferred device (for the browser) has been removed.
 
 **Note** that the **Audio Ouput Devices API** requires a successful call to `getUserMedia()` for every site with audio sinks that need to be manipulated, which &ndash; as a result &ndash; creates entries under `contentSettings['microphone']`, i. e.
 it allows those sites to access your microphone.
