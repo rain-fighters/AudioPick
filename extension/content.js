@@ -3,16 +3,14 @@
 // 2) Listening for device change messages from popup/worker.
 // Content script runs in WORLD:ISOLATED.
 //
-// Default entry and prefix used for our local storage variables.
-const storageString = "defaultDevice";
 // Assume active device is system default until proven otherwise.
 var activeDevice = "default";
 var activeSinkId;
 
 // Message handler.
 // Messages are expected in the format {action: value, ...}
-function onMessage(request, sender, sendResponse){
-	switch(request.action){
+function onMessage(request, sender, sendResponse) {
+	switch(request.action) {
 		case "setActiveDevice":
 			// The extension pop-up is asking us to set a new active device.
 			setAudioDevice(request.device);
@@ -31,11 +29,12 @@ function onMessage(request, sender, sendResponse){
 }
 
 // Send the new/selected sinkId to the script in MAIN.
-async function injectSinkId(){
+async function injectSinkId() {
 	// If we're setting the device to something non-default get Mic access.
 	if (activeSinkId !== "default") {
 		await chrome.runtime.sendMessage({
-			action: "setMicAccess", value: "allow"
+			action: "setMicAccess",
+			value: "allow"
 		});
 	}
 	// If we have an activeSinkId.
@@ -50,18 +49,17 @@ async function injectSinkId(){
 }
 
 // Set the specified device as the audio sink for all elements.
-async function setAudioDevice(deviceName){
+async function setAudioDevice(deviceName) {
 	var mediaDeviceInfo;
 	var sinkId = "default";
 	// If the target device is the system default skip straight to applying.
-	if (deviceName !== "default"){
+	if (deviceName !== "default") {
 		// If we're setting it to anything other than the system default
 		// make sure we have microphone access before we proceed.
-		await chrome.runtime.sendMessage(
-			{
-				action: "setMicAccess", value: "allow"
-			}
-		);
+		await chrome.runtime.sendMessage({
+			action: "setMicAccess",
+			value: "allow"
+		});
 		// Get the current list of audio devices.
 		mediaDeviceInfo = await navigator.mediaDevices.enumerateDevices();
 		mediaDeviceInfo.every(function (device) {
@@ -85,10 +83,11 @@ async function setAudioDevice(deviceName){
 	activeSinkId = sinkId;
 	// Set the active device name to the sinkId for default devices.
 	// Set it to the device label/name otherwise.
-	if (sinkId === "default" || sinkId === "communications")
-		{activeDevice = sinkId;}
-	else
-		{activeDevice = deviceName;}
+	if (sinkId === "default" || sinkId === "communications") {
+		activeDevice = sinkId;
+	} else {
+		activeDevice = deviceName;
+	}
 	// Update all elements on the page with the new sinkId.
 	await injectSinkId();
 	return true;
@@ -96,36 +95,31 @@ async function setAudioDevice(deviceName){
 
 async function init(){
 	// If we're top read settings from storage and set the active device.
-	if (window === top){
+	if (window === top) {
 		// Start listening for messages.
 		chrome.runtime.onMessage.addListener(onMessage);
 		// Get our domain string prefix from the worker.
-		const domainString = await chrome.runtime.sendMessage(
-				{
-						action: "getDomainString"
-				}
-		);
+		const domainString = await chrome.runtime.sendMessage({
+			action: "getDomainString"
+		});
 		// Get any stored values.
 		const storage = await chrome.storage.local.get(
-				["defaultDevice", domainString]
+			[domainString]
 		);
 		// Apply stored values if present.
-		if (storage.defaultDevice) {activeDevice = storage.defaultDevice;}
-		if (storage[domainString]) {activeDevice = storage[domainString];}
+		if (storage[domainString]) {
+			activeDevice = storage[domainString];
+		}
 		await setAudioDevice(activeDevice);
 	} else {
 		// If not top request the current active device info from top via worker.
 		// Set sinkId on all children.
-		activeSinkId = await chrome.runtime.sendMessage(
-				{
-						action: "getActiveSinkId"
-				}
-		);
-		activeDevice = await chrome.runtime.sendMessage(
-				{
-						action: "getActiveDevice"
-				}
-		);
+		activeSinkId = await chrome.runtime.sendMessage({
+			action: "getActiveSinkId"
+		});
+		activeDevice = await chrome.runtime.sendMessage({
+			action: "getActiveDevice"
+		});
 		await injectSinkId();
 	}
 	return false;

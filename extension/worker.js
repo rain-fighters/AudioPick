@@ -3,11 +3,15 @@
 // 2) Relaying messages from any frames/iframes/children back to the main tab.
 // 3) Injecting sinkId changes into WORLD:MAIN.
 // Worker runs in BACKGROUND.
+//
+// Prefix used for our local storage variables.
+const storagePrefix = "preferredDevice_";
+
 function onMessage(request, sender, sendResponse) {
 	switch (request.action) {
 	case "getDomainString":
 		// Return the storage prefix with the domain of the tab.
-		sendResponse("defaultDevice_" + sender.tab.url.split("/")[2]);
+		sendResponse(storagePrefix + sender.tab.url.split("/")[2]);
 		break;
 	case "getActiveSinkId":
 	case "getActiveDevice":

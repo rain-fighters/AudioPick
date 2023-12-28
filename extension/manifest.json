@@ -2,52 +2,42 @@
 	"manifest_version": 3,
 	"name": "AudioPick",
 	"short_name": "AudioPick",
-	"description": "Pick a default audio output device for HTML5 <audio/> and <video/> elements",
+	"description": "Pick a preferred audio output device for HTML5 <audio/> and <video/> elements",
 	"author": "necropola@rain-fighters.net",
 	"homepage_url": "https://rain-fighters.github.io/AudioPick/",
 	"version": "0.3.8",
 	"version_name": "0.3.8",
 	"action": {
 		"default_icon": {
-			"16": "AP_Icon16.png",
-			"19": "AP_Icon19.png",
-			"24": "AP_Icon24.png",
-			"32": "AP_Icon32.png",
-			"38": "AP_Icon38.png",
-			"48": "AP_Icon48.png",
-			"64": "AP_Icon96.png",
-			"96": "AP_Icon96.png",
-			"128": "AP_Icon128.png"
+			"16": "APV3_Icon_2d_2c_16.png",
+			"32": "APV3_Icon_2d_2c_32.png",
+			"48": "APV3_Icon_2d_2c_48.png",
+			"128": "APV3_Icon_2d_2c_128.png"
 		},
 		"default_title": "AudioPick",
 		"default_popup": "popup.html"
 	},
 	"icons": {
-		"16": "AP_Icon16.png",
-		"19": "AP_Icon19.png",
-		"24": "AP_Icon24.png",
-		"32": "AP_Icon32.png",
-		"38": "AP_Icon38.png",
-		"48": "AP_Icon48.png",
-		"64": "AP_Icon96.png",
-		"96": "AP_Icon96.png",
-		"128": "AP_Icon128.png"
+		"16": "APV3_Icon_2d_2c_16.png",
+		"32": "APV3_Icon_2d_2c_32.png",
+		"48": "APV3_Icon_2d_2c_48.png",
+		"128": "APV3_Icon_2d_2c_128.png"
 	},
-	"host_permissions": ["https://*/*"],
+	"host_permissions": ["https://*/*", "http://*/*"],
 	"background": {
 		"service_worker": "worker.js"
 	},
 	"content_scripts": [
 		{
-			"matches": ["https://*/*"],
-			"js": ["content.js"],
-			"world": "ISOLATED",
+			"matches": ["https://*/*", "http://*/*"],
+			"js": ["main.js"],
+			"world": "MAIN",
 			"all_frames" : true
 		},
 		{
-			"matches": ["https://*/*"],
-			"js": ["main.js"],
-			"world": "MAIN",
+			"matches": ["https://*/*", "http://*/*"],
+			"js": ["content.js"],
+			"world": "ISOLATED",
 			"all_frames" : true
 		}
 	],

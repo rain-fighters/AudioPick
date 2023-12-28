@@ -1,8 +1,7 @@
-// Default entry and prefix used for our local storage variables.
-const storageString = "defaultDevice";
+// Prefix used for our local storage variables.
+const storagePrefix = "preferredDevice_";
 // Assume all devices are the system default until proven otherwise.
 var domainDevice = "default";
-var defaultDevice = "default";
 var activeDevice = "default";
 var activeTab;
 var domainString;
@@ -50,9 +49,6 @@ function button_OnClick(e) {
 		// If we're here because the user clicked a save button then
 		// we should save the selection to the relevant local storage.
 		switch (e.target.id) {
-		case "saveDefault":
-			chrome.storage.local.set({[storageString]: activeDevice });
-			break;
 		case "saveSite":
 			chrome.storage.local.set({[domainString]: activeDevice });
 			break;
@@ -66,7 +62,6 @@ function button_OnClick(e) {
 function buildDeviceList(mediaDeviceInfo) {
 	var activeExists = false;
 	var domainExists = false;
-	var defaultExists = false;
 	// Select the element from the HTML we will use as our parent.
 	var mainElement = document.getElementById("device_options");
 	// Check if any of the active/domain default/default devices exist.
@@ -85,21 +80,12 @@ function buildDeviceList(mediaDeviceInfo) {
 				device.deviceId === domainDevice
 			)
 		));
-		defaultExists = (!defaultExists && (
-			(
-				device.label === defaultDevice
-			) || (
-				device.deviceId === defaultDevice
-			)
-		));
 		return !activeExists;
 	});
 	// Use saved device in order of preference (active > domain > default).
 	if (!activeExists) {
 		if (domainExists) {
 			activeDevice = domainDevice;
-		} else if (defaultExists) {
-			activeDevice = defaultDevice;
 		} else {
 			activeDevice = "default";
 		}
@@ -152,16 +138,6 @@ function buildDeviceList(mediaDeviceInfo) {
 				labelElement.style.fontStyle = "italic";
 				labelElement.style.color = "purple";
 			}
-			// The default device for the extension is just italic.
-			if (
-				(
-					device.label === defaultDevice
-				) || (
-					device.deviceId === defaultDevice
-				)
-			) {
-				labelElement.style.fontStyle = "italic";
-			}
 			// Set text and append elements.
 			textNode.textContent = desc;
 			labelElement.appendChild(radioElement);
@@ -183,30 +159,22 @@ async function init() {
 	});
 	// If we're not on http or https immediately close.
 	// Extension doesn't like to work on chrome:// or file:// URLs.
-	if (!activeTab.url || (activeTab.url.toLowerCase().indexOf("https") === -1)) {
+	if (!activeTab.url || (activeTab.url.toLowerCase().indexOf("http") === -1)) {
 		window.close();
 		return;
 	}
 	// Generate domain storage name from tab URL.
-	domainString = storageString + "_" + activeTab.url.split("/")[2];
-	// Retreive domain and extension default settings if they exist.
-	const storage = await chrome.storage.local.get(
-		[storageString, domainString]
-	);
-	// Save stored results for later and set preferred defaults.
-	if (storage.defaultDevice) {
-		defaultDevice = storage.defaultDevice;
-		activeDevice = defaultDevice;
-	}
+	domainString = storagePrefix + activeTab.url.split("/")[2];
+	// Retrieve domain settings if they exist.
+	const storage = await chrome.storage.local.get([domainString]);
 	if (storage[domainString]) {
 		domainDevice = storage[domainString];
 		activeDevice = domainDevice;
 	}
 	// Get the active device from the current tab.
-	const response = await chrome.tabs.sendMessage(
-		activeTab.id,
-		{action: "getActiveDevice"}
-	);
+	const response = await chrome.tabs.sendMessage(activeTab.id, {
+		action: "getActiveDevice"
+	});
 	if (response) {
 		activeDevice = response;
 	}
