@@ -31,7 +31,7 @@ function onMessage(request, sender, sendResponse) {
 // Send the new/selected sinkId to the script in MAIN.
 async function injectSinkId() {
 	// If we're setting the device to something non-default get Mic access.
-	if (activeSinkId !== "default") {
+	if (activeSinkId && (activeSinkId !== "default")) {
 		await chrome.runtime.sendMessage({
 			action: "setMicAccess",
 			value: "allow"
