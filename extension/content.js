@@ -12,11 +12,11 @@ var activeSinkId;
 function onMessage(request, sender, sendResponse) {
 	switch(request.action) {
 		case "setActiveDevice":
-			// The extension pop-up is asking us to set a new active device.
+			// The extension popup is asking us to set a new active device.
 			setAudioDevice(request.device);
 			break;
 		case "getActiveDevice":
-			// The exension pop-up or a child of this tab is asking for the
+			// The exension popup or a child of this tab is asking for the
 			// current active device. Only respond if we're the window.
 			sendResponse(activeDevice);
 			break;
@@ -64,15 +64,10 @@ async function setAudioDevice(deviceName) {
 		mediaDeviceInfo = await navigator.mediaDevices.enumerateDevices();
 		mediaDeviceInfo.every(function (device) {
 			// Skip any audio input devices or devices without deviceIds.
-			if ((device.kind === "audiooutput" && device.deviceId) && (
+			if ((device.kind === "audiooutput") && device.deviceId &&
 				// If the device label or device id matches our device name
 				// then set our sinkId to the deviceId.
-				(
-					device.label === deviceName
-				) || (
-					device.deviceId === deviceName
-				)
-			)) {
+				((device.label === deviceName) || (device.deviceId === deviceName))) {
 				sinkId = device.deviceId;
 				return false;
 			}
@@ -83,7 +78,7 @@ async function setAudioDevice(deviceName) {
 	activeSinkId = sinkId;
 	// Set the active device name to the sinkId for default devices.
 	// Set it to the device label/name otherwise.
-	if (sinkId === "default" || sinkId === "communications") {
+	if ((sinkId === "default") || (sinkId === "communications")) {
 		activeDevice = sinkId;
 	} else {
 		activeDevice = deviceName;

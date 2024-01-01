@@ -1,24 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>AudioPick</title>
-	<style>
-		body {width:auto; line-height:1.25em; margin: 0.25rem;}
-		b {white-space:nowrap;}
-		p {line-height:inherit;margin-top:0em; margin-bottom:0.5em;}
-		ul {margin-top:0em; margin-bottom:0.5em;}
-		div {border-bottom-width: 1px; border-bottom-style: solid; padding-bottom: 0.1rem;}
-		label {display:block; white-space:nowrap; padding-top:0.25em; padding-bottom:0.25em}
-		input[type=radio] {vertical-align:bottom; margin-left: 0;}
-		button {margin-top: 0.15rem; max-width: 5.1rem; line-height: 0.8rem;}
-		button#saveSite, button#saveDefault {float: right; font-size:90%; padding-inline: 0;}
-	</style>
+	<link rel="stylesheet" type="text/css" href="popup.css">
+	<script src="popup.js" defer></script>
 </head>
 <body>
-	<b>Select playback device:</b>
-	<div id="device_options"></div>
-	<button id="apply" autofocus type="button">Apply</button>
-	<button id="saveSite" type="button">Save Domain</button>
-	<script src="popup.js"></script>
+	<header>
+		<a href="https://rain-fighters.github.io/AudioPick/" target="_blank" tabindex="-1"
+			title="AudioPick Home">
+			<h1>AudioPick
+				<svg xmlns="http://www.w3.org/2000/svg"
+					width="24" height="24" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+					class="lucide lucide-external-link">
+						<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+						<polyline points="15 3 21 3 21 9"/>
+						<line x1="10" x2="21" y1="14" y2="3"/>
+				</svg>
+			</h1>
+		</a>
+		<img src="./APV3_Icon_2d_2c_128.png"/>
+	</header>
+	<main>
+		<h2>Pick a preferred audio output device for the active tab</h2>
+		<table id="device_options">
+		</table>
+		<nav>
+			<button id="apply" type="button" tabindex="-1">Apply just for now</button>
+			<button id="cancel" type="button" tabindex="-1">Cancel</button>
+			<button id="applyStar" type="button" tabindex="-1">Apply and &#9733; for domain</button>
+		</nav>
+	</main>
+	<footer>
+		<a href="https://github.com/rain-fighters/AudioPick/releases" target="_blank" tabindex="-1"
+			title="AudioPick Releases on GitHub">
+			0.3.8
+			<svg xmlns="http://www.w3.org/2000/svg"
+				width="12" height="12" viewBox="0 0 24 24" fill="none"
+				stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+				class="lucide lucide-external-link">
+					<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+					<polyline points="15 3 21 3 21 9"/>
+					<line x1="10" x2="21" y1="14" y2="3"/>
+			</svg>
+		</a>
+		<span id="status_message"></span>
+		<a href="https://rain-fighters.net/" target="_blank" tabindex="-1"
+			title="Rain-Fighters Home">
+			rain-fighters.net
+			<svg xmlns="http://www.w3.org/2000/svg"
+				width="24" height="24" viewBox="0 0 24 24" fill="none"
+				stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+				class="lucide lucide-external-link">
+					<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+					<polyline points="15 3 21 3 21 9"/>
+					<line x1="10" x2="21" y1="14" y2="3"/>
+			</svg>
+		</a>
+	</footer>
 </body>
 </html>

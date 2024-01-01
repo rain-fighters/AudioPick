@@ -1,10 +1,11 @@
 // Prefix used for our local storage variables.
 const storagePrefix = "preferredDevice_";
+var tabError = ""
+var activeTab;
+var domainString;
 // Assume all devices are the system default until proven otherwise.
 var domainDevice = "default";
 var activeDevice = "default";
-var activeTab;
-var domainString;
 
 // Sets microphone access using contentSettings API.
 async function setMicAccess(pattern, value) {
@@ -22,6 +23,11 @@ async function setMicAccess(pattern, value) {
 
 // Click handler used for all buttons on the pop-up.
 function button_OnClick(e) {
+	// Just close the window, when cancel has been clicked,
+	if (e.target.id === "cancel") {
+		window.close();
+		return;
+	}
 	// Check which device has been selected.
 	var selected = document.querySelectorAll("input[type='radio']:checked")[0];
 	// Create domain pattern in case we need to set Mic access.
@@ -32,7 +38,7 @@ function button_OnClick(e) {
 		// Set permission for site back to "ask".
 		setMicAccess(micPattern, "ask");
 	}
-	if (selected.id === "default" || selected.id === "communications") {
+	if ((selected.id === "default") || (selected.id === "communications")) {
 		// If the default audio or comms device was selected we use their ID.
 		// This avoids mismatches when they change defaults.
 		activeDevice = selected.id;
@@ -46,43 +52,75 @@ function button_OnClick(e) {
 		action: "setActiveDevice",
 		device: activeDevice
 	}).then(function () {
-		// If we're here because the user clicked a save button then
-		// we should save the selection to the relevant local storage.
-		switch (e.target.id) {
-		case "saveSite":
+		// If we're here because the user clicked the "applyStar" button,
+		// we save the selection as "preferred" to the local storage.
+		if (e.target.id === "applyStar") {
 			chrome.storage.local.set({[domainString]: activeDevice });
-			break;
 		}
-		// Close the pop-up now that a selection has been made.
+		// Close the popup.
 		window.close();
 	});
 }
 
-// Build the elements for our popup from the list of devices.
-function buildDeviceList(mediaDeviceInfo) {
+function addDeviceRow(table, deviceId, deviceLabel, isActive, isPreferred, isDisabled) {
+	var row = table.insertRow(-1);
+	var cell0 = row.insertCell(0);
+	var cell1 = row.insertCell(1);
+	var cell2 = row.insertCell(2);
+	var radioElement = document.createElement("input");
+	var labelElement = document.createElement("label");
+	var textNode = document.createTextNode("");
+	radioElement.type = "radio";
+	radioElement.name = "device";
+	radioElement.id = deviceId;
+	// We use the device label as the activeDevice we pass to the tab.
+	radioElement.value = deviceLabel;
+	radioElement.checked = isActive;
+	radioElement.disabled = isDisabled;
+	if (isDisabled) { row.classList.add("disabled"); }
+	// Make standard label for default devices & use provided for rest.
+	switch (deviceId) {
+		case "default":
+			textNode.textContent = "Default Audio Device";
+			break;
+		case "communications":
+			textNode.textContent = "Default Communications Device";
+			break;
+		default:
+			textNode.textContent = deviceLabel;
+	}
+	labelElement.htmlFor = deviceId;
+	labelElement.appendChild(textNode);
+	cell0.appendChild(radioElement);
+	cell1.appendChild(labelElement);
+	if (isPreferred) {
+		cell2.innerHTML = "&#9733"; // star
+	} else {
+		cell2.innerHTML = "&nbsp;"; // blank
+	}
+}
+
+function buildDeviceTable(mediaDeviceInfo) {
 	var activeExists = false;
 	var domainExists = false;
-	// Select the element from the HTML we will use as our parent.
-	var mainElement = document.getElementById("device_options");
-	// Check if any of the active/domain default/default devices exist.
-	mediaDeviceInfo.every(function (device) {
-		activeExists = (!activeExists && (
-			(
-				device.label === activeDevice
-			) || (
-				device.deviceId === activeDevice
-			)
-		));
-		domainExists = (!domainExists && (
-			(
-				device.label === domainDevice
-			) || (
-				device.deviceId === domainDevice
-			)
-		));
-		return !activeExists;
+	var table = document.getElementById("device_options");
+
+	// Remove all existing rows from the device table.
+	while (table.rows.length > 0) { table.deleteRow(0); }
+
+	// Check, if we (still) find the tab's activeDevice and its domain's
+	// possibly stored "preferred device" (domainDevice) in our current
+	// list of "audiooutput" devices.
+	mediaDeviceInfo.forEach(function (device) {
+		if (device.kind === "audiooutput") {
+			activeExists = activeExists ||
+				(device.label === activeDevice) || (device.deviceId === activeDevice);
+			domainExists = domainExists ||
+				(device.label === domainDevice) || (device.deviceId === domainDevice);
+		}
 	});
-	// Use saved device in order of preference (active > domain > default).
+	// Pick the best match (active > domain > "default") from the list of EXISTING
+	// "audiooutput" devices, so that it gets pre-checked in the device table.
 	if (!activeExists) {
 		if (domainExists) {
 			activeDevice = domainDevice;
@@ -90,101 +128,86 @@ function buildDeviceList(mediaDeviceInfo) {
 			activeDevice = "default";
 		}
 	}
-	// Remove any existing children from parent.
-	mainElement.childNodes.forEach((node) => node.remove());
+
 	// Generate our device entries.
 	mediaDeviceInfo.forEach(function (device) {
-		var desc;
-		var radioElement = document.createElement("input");
-		var labelElement = document.createElement("label");
-		var textNode = document.createTextNode("");
 		// Filter out input devices.
 		if (device.kind === "audiooutput") {
-			radioElement.type = "radio";
-			radioElement.name = "device";
-			radioElement.id = device.deviceId;
-			switch (device.deviceId) {
-			// Make standard label for default devices & use provided for rest.
-			case "default":
-				desc = "Default Audio Device";
-				break;
-			case "communications":
-				desc = "Default Communications Device";
-				break;
-			default:
-				desc = device.label;
+			var isActive = false;
+			var isPreferred= false;
+			if (tabError === "") { // tab is valid and has a content script
+				// Is this the tab's activeDevice?
+				if ((device.label === activeDevice) || (device.deviceId === activeDevice)) {
+					isActive = true;
+				}
+				// Is this the tab domain`s preferred/starred device?
+				if ((device.label === domainDevice) || (device.deviceId === domainDevice)) {
+					isPreferred = true;
+				}
 			}
-			// We use the device label as the identifier we pass to the tab.
-			radioElement.value = device.label;
-			// Bold the entry for the active device for a visual indicator.
-			if (
-				(
-					device.label === activeDevice
-				) || (
-					device.deviceId === activeDevice
-				)
-			) {
-				radioElement.checked = true;
-				labelElement.style.fontWeight = "bold";
-			}
-			// The default device for the domain is purple and italic.
-			if (
-				(
-					device.label === domainDevice
-				) || (
-					device.deviceId === domainDevice
-				)
-			) {
-				labelElement.style.fontStyle = "italic";
-				labelElement.style.color = "purple";
-			}
-			// Set text and append elements.
-			textNode.textContent = desc;
-			labelElement.appendChild(radioElement);
-			labelElement.appendChild(textNode);
-			mainElement.appendChild(labelElement);
+			addDeviceRow(table, device.deviceId, device.label, isActive, isPreferred, (tabError !== ""));
 		}
 	});
-	// Set the onClick handler for all buttons on the page.
-	Array.from(document.getElementsByTagName("button")).forEach(function (e) {
-		e.onclick = button_OnClick;
-	});
+	// If the preferred device no longer exists, e. g. was removed or renamed,
+	// we add a disabled entry indicating this to the user.
+	if (domainDevice && !domainExists) {
+		addDeviceRow(table, "unknownId", domainDevice, false, true, true);
+	}
 }
 
 async function init() {
+	var status = document.getElementById("status_message");
 	// Get the current active / calling tab.
 	[activeTab] = await chrome.tabs.query({
 		active: true,
 		currentWindow: true
 	});
-	// If we're not on http or https immediately close.
-	// Extension doesn't like to work on chrome:// or file:// URLs.
-	if (!activeTab.url || (activeTab.url.toLowerCase().indexOf("http") === -1)) {
-		window.close();
-		return;
+	// Check whether the tab has a valid (HTTPS) URL.
+	if (!activeTab.url || (activeTab.url.toLowerCase().indexOf("https") === -1)) {
+		tabError = "Invalid URL. Not HTTPS.";
 	}
-	// Generate domain storage name from tab URL.
-	domainString = storagePrefix + activeTab.url.split("/")[2];
-	// Retrieve domain settings if they exist.
-	const storage = await chrome.storage.local.get([domainString]);
-	if (storage[domainString]) {
-		domainDevice = storage[domainString];
-		activeDevice = domainDevice;
+	if (tabError === "") {
+		// Generate domain storage name from tab URL.
+		domainString = storagePrefix + activeTab.url.split("/")[2];
+		// Retrieve domain settings if they exist.
+		const storage = await chrome.storage.local.get([domainString]);
+		if (storage[domainString]) {
+			domainDevice = storage[domainString];
+			// Nope, we should not assume this!
+			// activeDevice = domainDevice;
+		}
+		// Get the active device from the current tab.
+		try {
+			const response = await chrome.tabs.sendMessage(activeTab.id, {
+				action: "getActiveDevice"
+			});
+			if (response) {
+				activeDevice = response;
+			}
+		} catch(error) {
+			tabError = "Content Script not reponding. Try reloading the page.";
+		}
 	}
-	// Get the active device from the current tab.
-	const response = await chrome.tabs.sendMessage(activeTab.id, {
-		action: "getActiveDevice"
-	});
-	if (response) {
-		activeDevice = response;
-	}
+	// Display the current tab status/error.
+	status.innerHTML = tabError;
 	// Set our extensions microphone access permissions so we can
 	// access non-default audio devices when we list them.
 	await setMicAccess("*://" + chrome.runtime.id + "/*", "allow");
 	// Get the current list of audio devices.
 	const deviceList = await navigator.mediaDevices.enumerateDevices();
-	// Build pop-up interface.
-	buildDeviceList(deviceList);
+	// Build the popup's device table.
+	buildDeviceTable(deviceList);
+	// Set the onClick handler for all buttons and disable
+	// all but the "cancel" button, if tabError !== "".
+	Array.from(document.getElementsByTagName("button")).forEach(function (e) {
+		if ((tabError === "") || (e.id === "cancel")) {
+			e.disabled = false;
+			e.onclick = button_OnClick;
+		} else {
+			e.disabled = true;
+			e.onclick = "";
+		}
+	});
 }
 
 init();

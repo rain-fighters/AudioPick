@@ -23,19 +23,19 @@
 		"48": "APV3_Icon_2d_2c_48.png",
 		"128": "APV3_Icon_2d_2c_128.png"
 	},
-	"host_permissions": ["https://*/*", "http://*/*"],
+	"host_permissions": ["https://*/*"],
 	"background": {
 		"service_worker": "worker.js"
 	},
 	"content_scripts": [
 		{
-			"matches": ["https://*/*", "http://*/*"],
+			"matches": ["https://*/*"],
 			"js": ["main.js"],
 			"world": "MAIN",
 			"all_frames" : true
 		},
 		{
-			"matches": ["https://*/*", "http://*/*"],
+			"matches": ["https://*/*"],
 			"js": ["content.js"],
 			"world": "ISOLATED",
 			"all_frames" : true
