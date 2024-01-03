@@ -1,8 +1,8 @@
 theme: jekyll-theme-slate
 google_site_verification: D5ixU_08KXu4tDMaycnskWkUtkC3kO5oKSb6NTsfXPE
 
-favicon: /assets/images/APV3_Icon_2d_2c_192.png
-logo: /assets/images/APV3_Icon_2d_2c_512.png
+favicon: ./assets/images/APV3_Icon_2d_2c_192.png
+logo: ./assets/images/APV3_Icon_2d_2c_512.png
 
 plugins:
   - jekyll-seo-tag
