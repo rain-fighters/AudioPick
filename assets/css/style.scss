@@ -2,3 +2,7 @@
 ---
 
 @import "{{ site.theme }}";
+
+code, pre {
+	background-color: inherit;
+}
