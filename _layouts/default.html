@@ -2,11 +2,11 @@
 <html>
 	<head>
 		<meta charset='utf-8'>
-		<meta http-equiv="X-UA-Compatible" content="chrome=1">
-		<meta name="viewport" content="width=device-width,maximum-scale=2">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="description" content="{{ site.title | default: site.github.repository_name }} : {{ site.description | default: site.github.project_tagline }}">
 		<link rel="canonical" href="{{ site.url }}{{ site.baseurl }}/">
-		<link rel="shortcut icon" type="image/png" href="./assets/images/APV3_Icon_2d_2c_192.png">
+		<link rel="shortcut icon" type="image/png" href="{{ site.favicon }}">
+		<!-- <link rel="shortcut icon" type="image/png" href="./assets/images/APV3_Icon_2d_2c_192.png"> -->
 		<link rel="stylesheet" type="text/css" media="screen" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
 		{% seo %}
 	</head>
@@ -15,17 +15,14 @@
 		<!-- HEADER -->
 		<div id="header_wrap" class="outer">
 		<header class="inner" style="padding:10px 10px 10px 10px;">
-			<a href="{{site.github.repository_url}}" style="display:block;position:absolute;top:0;right:0;background-color:transparent;margin:0;width:20%;padding:3.5ex 0 0 0;">
-				<img src="./assets/images/APV3_Icon_2d_2c_512.png" style="width:100%;border-style:none;box-shadow:none;margin:0;padding:0;"/>
+			<a href="{{site.github.repository_url}}"
+				style="display:block; position:absolute; top:0; right:0;
+					background-color:transparent; margin:0; width:20%; padding:3.5ex 0 0 0;">
+				<img src="{{ site.logo }}" style="width:100%; border-style:none; box-shadow:none; margin:0; padding:0;"/>
+				<!-- <img src="./assets/images/APV3_Icon_2d_2c_512.png" style="width:100%; border-style:none; box-shadow:none; margin:0; padding:0;"/> -->
 			</a>
 			<h1 id="project_title">{{ site.title | default: site.github.repository_name }}</h1>
 			<h2 id="project_tagline" style="width:75%;">{{ site.description | default: site.github.project_tagline }}</h2>
-				{% if site.show_downloads %}
-				<section id="downloads">
-					<a class="zip_download_link" href="{{ site.github.zip_url }}">Download this project as a .zip file</a>
-					<a class="tar_download_link" href="{{ site.github.tar_url }}">Download this project as a tar.gz file</a>
-				</section>
-				{% endif %}
 		</header>
 		</div>
 
