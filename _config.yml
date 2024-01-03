@@ -4,6 +4,10 @@ google_site_verification: D5ixU_08KXu4tDMaycnskWkUtkC3kO5oKSb6NTsfXPE
 plugins:
   - jekyll-seo-tag
 
+kramdown:
+  syntax_highlighter: rouge
+  input: GFM
+
 defaults:
   - scope:
       path: ""
