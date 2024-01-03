@@ -1,9 +1,7 @@
 theme: jekyll-theme-slate
 google_site_verification: D5ixU_08KXu4tDMaycnskWkUtkC3kO5oKSb6NTsfXPE
 
-gems:
-  - jekyll-mentions
-  - jekyll-sitemap
+plugins:
   - jekyll-seo-tag
 
 defaults:
