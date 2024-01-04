@@ -1,2 +1,6 @@
 *.zip
 *.pem
+
+# temporary folders
+extension.*
+resources.*
