@@ -15,4 +15,4 @@ defaults:
   - scope:
       path: ""
     values:
-      image: /assets/images/audiopick-preview-890x890.png
+      image: /assets/images/audiopick-preview-925x925.png
