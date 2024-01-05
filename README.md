@@ -1,4 +1,4 @@
-# AudioPick <img src="./resources/Icons/APV3_Icon_2d_2c_192.png" align="right" width="128" height="128">
+# AudioPick <!-- <img src="./resources/Icons/APV3_Icon_2d_2c_192.png" align="right" width="128" height="128"> -->
 A **Chrome Manifest V3 Extension** to pick a preferred audio output device for **HTML5** `<audio/>` and `<video/>` elements
 
 ## How it works
