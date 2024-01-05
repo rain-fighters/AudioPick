@@ -11,6 +11,10 @@ code, pre {
 	background: linear-gradient(to top, #727C92, #121322);
 }
 
+#main_content {
+    padding-top: 1rem;
+}
+
 #main_content_wrap {
 	background: #f0f2f4;
 	border: 0;
@@ -25,7 +29,7 @@ p, ul, blockquote {
 }
 
 h1, h2, h3, h4, h5, h6 {
-	margin: 0;
+	margin: .5rem 0 0 0;
 	padding: 0;
 	background: inherit;
 }
