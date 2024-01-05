@@ -7,7 +7,7 @@ to switch to the preferred audio output device. Since version `0.3.8` it also fi
 
 Since it's now possible to store/remember a preferred audio output device **per site/domain**, the extension's **option panel** and hence the option to set a global preferred device (for the browser) has been removed. This also significantly reduces the number of microphone permission that the extension acquires (see below).
 
-**Note** that the **Audio Ouput Devices API** requires media (microphone) permissions to be granted to every site with audio sinks that need to be manipulated, which &ndash; as a result &ndash; allows those sites to access your microphone. Hence **AudioPick** only acquires permission when the user actually picks a non-default device for a site and restores permissions when the user reverts back to using the default.
+**Note** that the **Audio Ouput Devices API** requires media (microphone) permissions to be granted to every site with audio sinks that need to be manipulated, which &ndash; as a result &ndash; allows those sites to access your microphone. Hence **AudioPick** only acquires permissions when the user actually picks a non-default device for a site and restores permissions when the user reverts back to using the default.
 
 ## Free/Libre Open Source
 We publish this/our software as **Free/Libre Open Source** licensed under [**GPL-3.0**](https://www.gnu.org/licenses/gpl-3.0.en.html#license-text) to ensure that you have and continue to have the following four fundamental freedoms:
@@ -18,7 +18,7 @@ We publish this/our software as **Free/Libre Open Source** licensed under [**GPL
 
 &ndash; [The Foundations of the GPL](https://www.gnu.org/licenses/quick-guide-gplv3.html#the-foundations-of-the-gpl)
 
-While **Free/Libre Open Software** refers to **free** as in **free speech**, not as in **free beer**, we have decided
+While **Free/Libre Open Software** refers to **free** as in **free speech**, not as in **free beer**, we have also decided
 - to not charge users for (a copy of) our software,
 - to not re-license our software under a non-GPL (commercial) license,
 - to not grant benefits or add additional features to/for users offering payment, and
@@ -27,16 +27,20 @@ While **Free/Libre Open Software** refers to **free** as in **free speech**, not
 Though we accept [&#10084;Gratuities](#gratuities).
 
 ## Privacy
-**Privacy** and **Liberty** go hand in hand. You should not be **forced** to willingly or even unwillingly disclose personal data in order to be able to use a software or access information that is important to you. Hence neither our software nor our web pages collect usage data or require registration.
+**Privacy** and **Liberty** go hand in hand. You should not be **forced** to willingly or even unwillingly disclose personal data in order to be able to use a software or access information that is important for you. Hence neither our software nor our web pages collect usage data or require registration.
 
 Our web pages are **static HTML documents** and do not set **cookies**. They do not contain any **JavaScript** code, unless it is required to provide a very specific function, e. g. local search, or to demonstrate some code in action.
 
-Our software, in this case the **AudioPick** extension, also does not track usage data by itself, though you need to be aware that installing an extension from the **Chrome WebStore** and using it in **Chrome** generates usage data for the WebStore, e. g. how often the extension is installed. We have opted out of using **google-analytics** to track and evaluate usage data ourselves. Also note that downloading the extension from **GitHub** probably leaves a trace.
+Our software, in this case the **AudioPick** extension, also does not track usage data by itself, though you need to be aware that installing an extension from the **Chrome WebStore** and using it in **Chrome** generates usage data for the WebStore, e. g. how often the extension is installed. We have opted out of using **google-analytics** to track and evaluate usage data ourselves. Also note that downloading the extension from **GitHub** probably leaves a trace, too.
 
 If we get access to usage/user data, e. g. IP or email addresses, it's most likely unavoidable and we do our best to get rid of unneeded information, e. g. rotate log files of web servers we control. In any case, we do not transfer or even sell any usage/user data to 3rd parties.
 
 ## Gratuities
-Coming soon ...
+That all being said, you may show appreciation for our work by paying a completely voluntary tip. For that purpose we have created a [&#10084;Payment link on Stripe](https://buy.stripe.com/9AQ2bp1MJbkeboQ7ss) which allows you to give any amount between 1€ and 10€, defaulting to €3 to keep the processing fee ratio in check.
+
+Sadly, using this link/page for tipping does not work anonymously, e. g. **Stripe** requires you to enter a valid email address, but we haven't found a better / more private way, e. g. online cash, to show monetary appreciation over the internet. Hence you should only use the link/page, when you are aware of and agree to its privacy implications.
+
+Lastly, we will not disclose what gratuities (if any) are spent on. Maybe on a new keyboard, maybe on many more pots of tea or maybe on icecream for the family. We don't know ourselves yet.
 
 ## Links
 - [AudioPick Extension on the Chrome Webstore](https://chrome.google.com/webstore/detail/audiopick/gfhcppdamigjkficnjnhmnljljhagaha)
