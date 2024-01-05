@@ -153,7 +153,7 @@ tr.disabled > td {
 	font-style: italic;
 }
 
-label {
+td label {
 	font-family: var(--mono-font);
 	font-size: var(--mono-font-size);
 	overflow-wrap: anywhere;
@@ -164,6 +164,20 @@ main nav {
 	display: flex;
 	justify-content: space-between;
 	flex-direction: row;
+}
+
+main nav.options div {
+	display: inline-block;
+}
+
+main nav.options div input {
+	vertical-align: bottom;
+}
+
+main nav.options div label {
+	font-family: var(--sans-font);
+	font-size: var(--small-font-size);
+	vertical-align: bottom;
 }
 
 button {
@@ -209,8 +223,16 @@ footer {
 	font-size: var(--small-font-size);
 	color: var(--text-light);
 }
-footer img { width: 2rem; height: 2rem; }
 
-footer span { /* our error/status message */
+footer a {
+/* make both links same width to center the error message */
+	width: 9rem;
+}
+
+footer a ~ a {
+	text-align: right;
+}
+
+footer span { /* error/status message */
 	color: var(--logo-red);
 }

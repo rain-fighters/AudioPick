@@ -7,8 +7,18 @@
 var activeDevice = "default";
 var activeSinkId;
 
-// Message handler.
+// Write to console.log, if debugging is enabled.
+function debugMessage(...args) {
+	chrome.storage.local.get(["enableDebug"]).then(function(result) {
+		if (result && result.enableDebug) {
+			console.log('APV3-content.js', ...args);
+		}
+	});
+}
+
 // Messages are expected in the format {action: value, ...}
+// NOTE that only the content script for the top window/frame
+// registers this message listener.
 function onMessage(request, sender, sendResponse) {
 	switch(request.action) {
 		case "setActiveDevice":
@@ -17,19 +27,51 @@ function onMessage(request, sender, sendResponse) {
 			break;
 		case "getActiveDevice":
 			// The exension popup or a child of this tab is asking for the
-			// current active device. Only respond if we're the window.
+			// current active device.
 			sendResponse(activeDevice);
 			break;
 		case "getActiveSinkId":
 			// A child of this tab is asking for the current active sinkId.
-			// Only respond if we're the window.
 			sendResponse(activeSinkId);
 			break;
+		case "getMicPolicy":
+			// The extension popup is asking us, whether we will be able to set
+			// non-default audio devices. Note that we cannot overide a "denied"
+			// policy of a site (response header) by letting the service worker
+			// change contentSettings["microphone"] to "allow", e. g.
+			// https://stackoverflow.com sends in its header
+			//     Feature-Policy: microphone 'none'; speaker 'none'
+			// which results in a "denied" policy for "microphone" access
+			// (and the invalid value "speaker 'none'" to be ignored).
+			navigator.permissions.query({ name: "microphone" }).then(function(result) {
+				sendResponse(result.state);
+			});
+			// We need to return true from onMessage() to keep the channel open,
+			// since our sendReponse() is called asynchronously here.
+			return true;
 	}
+}
+
+async function wakeupWorker() {
+	try {
+		await chrome.runtime.sendMessage({
+			action: "wakeup",
+			value: "now"
+		});
+	} catch(e) {
+		debugMessage("| wakeupWorker: Worker is hopefully awake now.");
+	}
+	return true;
 }
 
 // Send the new/selected sinkId to the script in MAIN.
 async function injectSinkId() {
+	var micPolicy = await navigator.permissions.query({ name: "microphone" });
+	debugMessage("| injectSink:", window.location.href, "| activeSinkId:", activeSinkId, "| micPolicy.state:", micPolicy.state);
+	if (micPolicy.state === "denied") {
+		// Do not try get microphone access and/or change sinkIds. It's futile.
+		return true;
+	}
 	// If we're setting the device to something non-default get Mic access.
 	if (activeSinkId && (activeSinkId !== "default")) {
 		await chrome.runtime.sendMessage({
@@ -52,6 +94,15 @@ async function injectSinkId() {
 async function setAudioDevice(deviceName) {
 	var mediaDeviceInfo;
 	var sinkId = "default";
+	var micPolicy = await navigator.permissions.query({ name: "microphone" });
+	debugMessage("| setAudioDevice:", window.location.href, "| device:", deviceName, "| micPolicy.state:", micPolicy.state);
+	if (micPolicy.state === "denied") {
+		// Do not try get microphone access and/or change sinkIds. It's futile.
+		return true;
+	}
+	// Send a dumnmy message to wake up the service worker
+	// This is a hack/workaround for a chrome bug on linux
+	await wakeupWorker();
 	// If the target device is the system default skip straight to applying.
 	if (deviceName !== "default") {
 		// If we're setting it to anything other than the system default
@@ -88,7 +139,7 @@ async function setAudioDevice(deviceName) {
 	return true;
 }
 
-async function init(){
+async function init() {
 	// If we're top read settings from storage and set the active device.
 	if (window === top) {
 		// Start listening for messages.

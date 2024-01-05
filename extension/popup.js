@@ -21,7 +21,34 @@ async function setMicAccess(pattern, value) {
 	return true;
 }
 
-// Click handler used for all buttons on the pop-up.
+// Clear all our microphone contentSettings.
+// Sadly there is no way to just clear our setting for a
+// specific pattern (site), but we might still use this
+//   - either whenever the popup is opened
+//   - or via an UI element (button) in the poopup.
+// TODO. Decide, how/whether to use this.
+async function clearMicAccess() {
+	await chrome.contentSettings.microphone.clear({
+		scope: (
+			activeTab.incognito
+			? "incognito_session_only"
+			: "regular"
+		)
+	});
+	return true;
+}
+
+// OnChange handler for our debug checkbox
+function checkbox_OnChange(e) {
+	console.log("checkbox_OnChange: ", e, e.target.id)
+	if (e.target.checked === true) {
+		chrome.storage.local.set({"enableDebug": true});
+	} else {
+		chrome.storage.local.set({"enableDebug": false});
+	}
+}
+
+// Click handler used for all buttons on the popup.
 function button_OnClick(e) {
 	// Just close the window, when cancel has been clicked,
 	if (e.target.id === "cancel") {
@@ -157,6 +184,14 @@ function buildDeviceTable(mediaDeviceInfo) {
 
 async function init() {
 	var status = document.getElementById("status_message");
+	var checkbox = document.getElementById("checkbox_debug");
+	var result = await chrome.storage.local.get("enableDebug");
+	if (result && result.enableDebug) {
+		checkbox.checked = true;
+	} else {
+		checkbox.checked = false;
+	}
+	checkbox.onchange = checkbox_OnChange;
 	// Get the current active / calling tab.
 	[activeTab] = await chrome.tabs.query({
 		active: true,
@@ -185,13 +220,32 @@ async function init() {
 				activeDevice = response;
 			}
 		} catch(error) {
-			tabError = "Content Script not reponding. Try reloading the page.";
+			tabError = "Content Script not reponding. Try reload.";
+		}
+	}
+	if (tabError === "") {
+		// Get the site's Permissions-Policy for microphone access.
+		try {
+			const response = await chrome.tabs.sendMessage(activeTab.id, {
+				action: "getMicPolicy"
+			});
+			if (response === "denied")  {
+				tabError = "Site denies microphone access.";
+			}
+		} catch(error) {
+			tabError = "Content Script not reponding. Try reload.";
 		}
 	}
 	// Display the current tab status/error.
 	status.innerHTML = tabError;
-	// Set our extensions microphone access permissions so we can
-	// access non-default audio devices when we list them.
+
+	// Clear all microphone access permissions managed by our extension
+	// TODO: Decide whether to call this here, call it via a popup button
+	// or not at all.
+	// await clearMicAccess();
+
+	// Set our extensions microphone access permissions so we (the popup)
+	// can access non-default audio devices when we list them.
 	await setMicAccess("*://" + chrome.runtime.id + "/*", "allow");
 	// Get the current list of audio devices.
 	const deviceList = await navigator.mediaDevices.enumerateDevices();

@@ -18,8 +18,7 @@ function onMessage(request, sender, sendResponse) {
 		// Create a proxy response function to catch errors that can happen
 		// when one of the non-top content scripts loads before top is done.
 		var responder = function (...args){
-			if (args.length === 0)
-			{
+			if (args.length === 0) {
 				console.log(chrome.runtime.lastError);
 			} else {
 				sendResponse.apply(this, args);
@@ -30,7 +29,7 @@ function onMessage(request, sender, sendResponse) {
 		break;
 	case "getMicAccess":
 		// Return the current microphone access permissions for tab.
-		// Unused currently as I couldn't find a useful way to restore
+		// Unused currently as we couldn't find a useful way to restore
 		// the value without breaking functionality.
 		chrome.contentSettings.microphone.get({
 			incognito: sender.tab.incognito,
@@ -72,6 +71,10 @@ function onMessage(request, sender, sendResponse) {
 			target : {tabId : sender.tab.id, allFrames : true},
 			world: "MAIN"
 		});
+		break;
+	case "wakeup":
+		// A dumnmy message that we are being sent to wake us up.
+		// This is a hack/workaround for a chrome bug on linux.
 		break;
 	}
 }

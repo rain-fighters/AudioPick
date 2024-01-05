@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### AudioPick-0.3.9
+- Add a Popup / UI option to enable/disable content script debug messages.
+- Detect and respect site Permissions-Policy for microphone access,
+  e. g. on https://stackoverflow.com
+- Work around a Chrome on linux bug/issue where the service worker does
+  not wake up (fast enough) from inactive state on message events.
+
 ### AudioPick-0.3.8
 - Rewrite for Manifest V3
 - New enhanced Popup / UI with dark/light mode support

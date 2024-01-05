@@ -25,10 +25,17 @@
 		<img src="./APV3_Icon_2d_2c_128.png"/>
 	</header>
 	<main>
-		<h2>Pick a preferred audio output device for the active tab</h2>
+		<nav class="options">
+			<h2>Pick a preferred audio output device for the active tab</h2>
+			<div>
+				<input type="checkbox" tabindex="-1" name="debug" id="checkbox_debug" value="debug"
+					title="Enable debug messages in content script">
+				<label for="checkbox_debug">debug</label>
+			</div>
+		</nav>
 		<table id="device_options">
 		</table>
-		<nav>
+		<nav class="buttons">
 			<button id="apply" type="button" tabindex="-1">Apply just for now</button>
 			<button id="cancel" type="button" tabindex="-1">Cancel</button>
 			<button id="applyStar" type="button" tabindex="-1">Apply and &#9733; for domain</button>
@@ -37,7 +44,7 @@
 	<footer>
 		<a href="https://github.com/rain-fighters/AudioPick/releases" target="_blank" tabindex="-1"
 			title="AudioPick Releases on GitHub">
-			0.3.8
+			0.3.9
 			<svg xmlns="http://www.w3.org/2000/svg"
 				width="12" height="12" viewBox="0 0 24 24" fill="none"
 				stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
