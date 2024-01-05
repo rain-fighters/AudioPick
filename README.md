@@ -1,4 +1,4 @@
-# AudioPick
+# AudioPick <img src="./resources/Icons/APV3_Icon_2d_2c_192.png" align="right" width="128" height="128">
 A **Chrome Manifest V3 Extension** to pick a preferred audio output device for **HTML5** `<audio/>` and `<video/>` elements
 
 ## How it works
@@ -41,4 +41,4 @@ Coming soon ...
 - [Rain-Fighters Home](https://rain-fighters.github.io/)
 
 ## Contributions
-The **Manifest V3** version is a complete rewrite of the original **Manifest V2** version and has been kindly contributed by [@XanSama](https://github.com/XanSama). **&#127876; Thank you! &#127876;**
+The **Manifest V3** `(0.3.X)` versions originate from a complete rewrite (of our **Manifest V2** version) which has been kindly contributed by [@XanSama](https://github.com/XanSama). **&#127876; Thank you! &#127876;**
