@@ -1,10 +1,8 @@
-# FAQ
-
 * TOC
 {:toc}
 
-** Question1
+## Question1
 Answer ...
 
-** Question2
+## Question2
 Answer ...
