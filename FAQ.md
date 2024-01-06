@@ -1,3 +1,6 @@
+# FAQ
+{:.no_toc}
+
 * TOC
 {:toc}
 
