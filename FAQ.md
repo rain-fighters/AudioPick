@@ -1,5 +1,5 @@
 # FAQ
-- TOC
+TOC
 {:toc}
 
 #### Why does the extension need **Microphone Permissions**?
@@ -23,5 +23,5 @@
 #### How did you come up with the **Idea** for the extension?
 ...
 
-##### How can I **Support AudioPick**?
+#### How can I **Support AudioPick**?
 ...
