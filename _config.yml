@@ -12,6 +12,7 @@ markdown: kramdown
 kramdown:
   syntax_highlighter: rouge
   input: GFM
+  toc_levels: 2..6
 
 defaults:
   - scope:
