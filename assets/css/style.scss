@@ -24,12 +24,12 @@ code, pre {
 	background: linear-gradient(to bottom, #727C92, #121322);
 }
 
-p, ul, blockquote {
-	margin: 0 0 .5rem 0;
+p, ul, li, blockquote {
+	margin: .25rem 0 .25rem 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
-	margin: 1rem 0 0 0;
+	margin: 1rem 0 .5rem 0;
 	padding: 0;
 	background: inherit;
 }

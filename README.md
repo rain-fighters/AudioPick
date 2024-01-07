@@ -9,6 +9,8 @@ Since it's now possible to store/remember a preferred audio output device **per 
 
 **Note** that the **Audio Ouput Devices API** requires media (microphone) permissions to be granted to every site with audio sinks that need to be manipulated, which &ndash; as a result &ndash; allows those sites to access your microphone. Hence **AudioPick** only acquires permissions when the user actually picks a non-default device for a site and restores permissions when the user reverts back to using the default.
 
+Check the [**FAQ**](./FAQ.md) for more information.
+
 ## Free/Libre Open Source
 We publish this/our software as **Free/Libre Open Source** licensed under [**GPL-3.0**](https://www.gnu.org/licenses/gpl-3.0.en.html#license-text) to ensure that you have and continue to have the following four fundamental freedoms:
 > - the freedom to use the software for any purpose,
@@ -31,7 +33,7 @@ Though we accept [&#10084;Gratuities](#gratuities).
 
 Our web pages are **static HTML documents** and do not set **cookies**. They do not contain any **JavaScript** code, unless it is required to provide a very specific function, e. g. local search, or to demonstrate some code in action.
 
-Our software, in this case the **AudioPick** extension, also does not track usage data by itself, though you need to be aware that installing an extension from the **Chrome WebStore** and using it in **Chrome** generates usage data for the WebStore, e. g. how often the extension is installed. We have opted out of using **google-analytics** to track and evaluate usage data ourselves. Also note that downloading the extension from **GitHub** probably leaves a trace, too.
+Our software, in this case the **AudioPick** extension, does not track usage data by itself, though you need to be aware that installing an extension from the **Chrome WebStore** and using it in the **Chrome Browser** generates usage data which is shown on the **Chrome  WebStore** and **Developer Dashboard**, e. g. how often the extension is installed. We have opted out of using **google-analytics** to track and evaluate usage data ourselves. Also note that downloading the extension from **GitHub** probably leaves a trace, too.
 
 If we get access to usage/user data, e. g. IP or email addresses, it's most likely unavoidable and we do our best to get rid of unneeded information, e. g. rotate log files of web servers we control. In any case, we do not transfer or even sell any usage/user data to 3rd parties.
 
