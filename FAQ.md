@@ -5,7 +5,7 @@
 #### Why does the extension need **Microphone Permissions**?
 ...
 
-#### Are there known conflicts between the extension and sites which manage audio devices on their own, e. g. **Discord**, **Teams**, **Signal**, **Elements**, ...?
+#### Are there conflicts between the extension and sites which manage audio devices on their own, e. g. **Discord**, **Teams**, **Signal**, **Elements**, ...?
 ...
 
 #### Which **Platforms** are supported by the extension?
@@ -24,4 +24,7 @@
 ...
 
 #### How can I **Support AudioPick**?
+...
+
+#### Who are or rather what is **Rain-Fighters**?
 ...
