@@ -20,7 +20,7 @@ We publish this/our software as **Free/Libre Open Source** licensed under [**GPL
 
 &ndash; [The Foundations of the GPL](https://www.gnu.org/licenses/quick-guide-gplv3.html#the-foundations-of-the-gpl)
 
-While **Free/Libre Open Source** refers to **free** as in **free speech**, not as in **free beer**, we have also decided
+While **Free/Libre Open Source** refers to **free** as in **free speech**, not as in **free beer**, we have chosen
 - to not charge users for (a copy of) our software,
 - to not re-license our software under a non-GPL (commercial) license,
 - to not grant benefits or add additional features to/for users offering payment, and
