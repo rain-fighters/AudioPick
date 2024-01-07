@@ -3,8 +3,23 @@
 
 @import "{{ site.theme }}";
 
+/*
+--logo-red: #D04949;
+--logo-green: #00C25E;
+--logo-blue: #3D67FF;
+--logo-yellow: #F5B62E;
+--logo-white: #E0E0E0;
+--logo-gray: #727C92;
+--logo-black: #121322;
+*/
+
 code, pre {
 	background-color: inherit;
+}
+
+code.error_message {
+	color: #D04949;
+	font-weight: bold;
 }
 
 #header_wrap {
