@@ -57,6 +57,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 table {
+	width: 100%;
 	margin: .75rem 0 .75rem 0;
 	border: 0;
 	border-collapse: collapse;
@@ -64,7 +65,7 @@ table {
 
 th, td {
 	vertical-align: middle;
-	padding: .5rem;
+	padding: .25rem;
 	border: 0;
 	border-bottom: 1px solid var(--border);
 }
