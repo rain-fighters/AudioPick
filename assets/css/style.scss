@@ -55,9 +55,11 @@ table {
 th {
 	padding: .25rem;
 	background: linear-gradient(to top, #727C92, #121322);
+	border 0;
 }
 
 td {
 	padding: .25rem;
+	border: 0;
 	border-bottom: 1px solid gray;
 }
