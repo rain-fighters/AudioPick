@@ -19,7 +19,10 @@ Generally only **HTTPS** sites are supported. This excludes internal chrome brow
 | **YouTube**<br>`https://www.youtube.com` | Fully Working |  |
 | **YoutTube Music**<br>`https://music.youtube.com` | Fully Working |  |
 | **Spotify**<br>`https://open.spotify.com` | Fully Working |  |
-| **SoundCloud**<br>`https://soundcloud.com`| Mostly Working | Might require a reload of the page when a new tab is opened through a link to a specific track and autoplay starts before **AudioPick** is able to inject its `changeSinkId` listener properly. |
+| **SoundCloud**<br>`https://soundcloud.com`| Mostly Working | Might require a page reload when a new tab is opened through a link/bookmark to a specific track and autoplay starts before **AudioPick** is able to inject its `changeSinkId` listener properly. |
+| Deezer<br>`https://www.deezer.com` | Kinda Working | Requires to click `Play->Pause->Play` once after (re-)loading the page in order to help **AudioPick** to inject its `changeSinkId` listener properly. See [Issue #49 on GitHub](https://github.com/rain-fighters/AudioPick/issues/49)| 
+| Amazon Music<br>`https://music.amazon.com` | Probably Working | The demo podcasts worked (without having a subscription). |
+| Netflix<br>`https://www.netflix.com` | Fully Working | |
 
 #### Why isn't the extension available for **Other Browsers**, e. g. **Firefox**?
 ...
