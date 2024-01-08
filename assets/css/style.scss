@@ -13,7 +13,7 @@
 	--logo-black: #121322;
 	--text: #373737;
  	--bg: #f0f2f4;
-	--border: #94A0BA;
+	--border: var(--logo-gray);
 }
 
 code, pre {
@@ -57,7 +57,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 table {
-	margin: 1rem 0 1rem 0;
+	margin: .75rem 0 .75rem 0;
 	border-collapse: collapse;
 	border: 0;
 }
