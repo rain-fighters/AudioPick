@@ -14,6 +14,13 @@
 #### Which **Sites** are supported by the extension? 
 Generally only **HTTPS** sites are supported. This excludes internal chrome browser pages like `chrome://settings` as well as sites not offering **SSL** encryption. The latter is rather rare nowadays and usually means that the site is either misconfigured or should not be trusted anyway. Another case are sites which (somehow) disable extensions entirely, e. g. the **Chrome WebStore** (`https://chromewebstore.google.com`), or sites which explicitly deny microphone access by sending a `Feature-Policy` or `Permissions-Policy` **Response Header** stating so. All of these cases are indicated by a <code class="error_message">Red Error Message</code> in the footer section of the extension popup.
 
+| Site | Status | Comment |
+|------|--------|---------|
+| **YouTube**<br>`https://www.youtube.com` | Fully Working |  |
+| **YoutTube Music**<br>`https://music.youtube.com` | Fully Working |  |
+| **Spotify**<br>`https://open.spotify.com` | Fully Working |  |
+| **SoundCloud**<br>`https://soundcloud.com`| Mostly Working | Might require a reload of the page when a new tab is opened through a link to a specific track and autoplay starts before **AudioPick** is able to inject its `changeSinkId` listener properly. |
+
 #### Why isn't the extension available for **Other Browsers**, e. g. **Firefox**?
 ...
 
