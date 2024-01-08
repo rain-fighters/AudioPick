@@ -19,7 +19,7 @@ code, pre {
 }
 
 code {
-	padding: .1rem;
+	padding: 0 .1rem 0 .1rem; /* top, right, bottom, left */
 	margin: 0 ;
 	box-shadow: none;
 }
