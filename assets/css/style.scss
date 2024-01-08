@@ -18,6 +18,12 @@ code, pre {
 	background-color: inherit;
 }
 
+code {
+	padding: 0;
+	margin: 0 ;
+	box-shadow: none;
+}
+
 code.error_message {
 	color: var(--logo-red);
 	font-weight: bold;
