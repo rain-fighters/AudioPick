@@ -4,13 +4,14 @@
 @import "{{ site.theme }}";
 
 :root {
---logo-red: #D04949;
---logo-green: #00C25E;
---logo-blue: #3D67FF;
---logo-yellow: #F5B62E;
---logo-white: #E0E0E0;
---logo-gray: #727C92;
---logo-black: #121322;
+	--logo-red: #D04949;
+	--logo-green: #00C25E;
+	--logo-blue: #3D67FF;
+	--logo-yellow: #F5B62E;
+	--logo-white: #E0E0E0;
+	--logo-gray: #727C92;
+	--logo-black: #121322;
+	--bg: #f0f2f4;
 }
 
 code, pre {
@@ -23,12 +24,11 @@ code.error_message {
 }
 
 #header_wrap {
-/*	background: linear-gradient(to top, #727C92, #121322);*/
 	background: linear-gradient(to top, var(--logo-gray),var(--logo-black));
 }
 
 #main_content_wrap {
-	background: #f0f2f4;
+	background: var(--bg);
 	border: 0;
 }
 
@@ -37,7 +37,6 @@ code.error_message {
 }
 
 #footer_wrap {
-/*	background: linear-gradient(to bottom, #727C92, #121322);*/
 	background: linear-gradient(to bottom, var(--logo-gray),var(--logo-black));
 }
 
@@ -56,7 +55,6 @@ table {
 
 th {
 	padding: .25rem;
-/*	background: linear-gradient(to top, #727C92, #121322);*/
 	background: linear-gradient(to top, var(--logo-gray),var(--logo-black));
 	border: 0;
 }
