@@ -3,7 +3,7 @@
 
 @import "{{ site.theme }}";
 
-/*
+:root {
 --logo-red: #D04949;
 --logo-green: #00C25E;
 --logo-blue: #3D67FF;
@@ -11,19 +11,20 @@
 --logo-white: #E0E0E0;
 --logo-gray: #727C92;
 --logo-black: #121322;
-*/
+}
 
 code, pre {
 	background-color: inherit;
 }
 
 code.error_message {
-	color: #D04949;
+	color: var(--logo-red);
 	font-weight: bold;
 }
 
 #header_wrap {
-	background: linear-gradient(to top, #727C92, #121322);
+/*	background: linear-gradient(to top, #727C92, #121322);*/
+	background: linear-gradient(to top, var(--logo-gray),var(--logo-black));
 }
 
 #main_content_wrap {
@@ -36,7 +37,8 @@ code.error_message {
 }
 
 #footer_wrap {
-	background: linear-gradient(to bottom, #727C92, #121322);
+/*	background: linear-gradient(to bottom, #727C92, #121322);*/
+	background: linear-gradient(to bottom, var(--logo-gray),var(--logo-black));
 }
 
 p, ul, li, blockquote {
@@ -54,12 +56,13 @@ table {
 
 th {
 	padding: .25rem;
-	background: linear-gradient(to top, #727C92, #121322);
-	border 0;
+/*	background: linear-gradient(to top, #727C92, #121322);*/
+	background: linear-gradient(to top, var(--logo-gray),var(--logo-black));
+	border: 0;
 }
 
 td {
 	padding: .25rem;
 	border: 0;
-	border-bottom: 1px solid gray;
+	border-bottom: 1px solid var(--logo-gray);
 }
