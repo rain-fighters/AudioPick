@@ -42,8 +42,6 @@ That all being said, you may show appreciation for our work by paying a complete
 
 Sadly, using this link/page for tipping does not work anonymously, e. g. **Stripe** requires you to enter a valid email address, but we haven't found a better / more private way, e. g. online cash, to show monetary appreciation over the internet. Hence you should only use the link/page, when you are aware of and agree to its privacy implications.
 
-Lastly, we will not disclose what gratuities (if any) are spent on. Maybe on a new keyboard, maybe on many more pots of tea or maybe on icecream for the family. We don't know ourselves yet.
-
 ## Links
 - [AudioPick Extension on the Chrome Webstore](https://chrome.google.com/webstore/detail/audiopick/gfhcppdamigjkficnjnhmnljljhagaha)
 - [AudioPick Source on GitHub](https://github.com/rain-fighters/AudioPick)

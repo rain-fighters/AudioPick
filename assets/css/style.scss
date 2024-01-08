@@ -11,7 +11,8 @@
 	--logo-white: #E0E0E0;
 	--logo-gray: #727C92;
 	--logo-black: #121322;
-	--bg: #f0f2f4;
+	--text: #373737;
+ 	--bg: #f0f2f4;
 }
 
 code, pre {
@@ -60,10 +61,12 @@ table {
 }
 
 th {
-	font-weight: bold;
 	padding: .25rem;
 	border: 0;
-	background: linear-gradient(to top, var(--logo-gray),var(--logo-black));
+	border-bottom: 1px solid var(--logo-gray);
+	font-weight: bold;
+	color: inherit;
+	background: inherit;
 }
 
 td {

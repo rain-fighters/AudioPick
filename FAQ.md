@@ -4,16 +4,16 @@ Work in progress ...
 - TOC
 {:toc}
 
-#### Why does the extension need **Microphone Access**?
+### Why does the extension need **Microphone Access**?
 ...
 
-#### Are there **Conflicts** between the extension and sites which manage audio devices on their own, e. g. **Discord**, **Teams**, **Signal**, **Elements**, ...?
+### Are there **Conflicts** between the extension and sites which manage audio devices on their own, e. g. **Discord**, **Teams**, **Signal**, **Elements**, ...?
 ...
 
-#### Which **Platforms** are supported by the extension?
+### Which **Platforms** are supported by the extension?
 ...
 
-#### Which **Sites** are supported by the extension? 
+### Which **Sites** are supported by the extension? 
 Generally only **HTTPS** sites are supported. This excludes internal chrome browser pages like `chrome://settings` as well as sites not offering **SSL** encryption. The latter is rather rare nowadays and usually means that the site is either misconfigured or should not be trusted anyway.
 
 Another case are sites which (somehow) disable extensions entirely, e. g. the **Chrome WebStore** (`https://chromewebstore.google.com`), or sites which explicitly deny microphone access by sending a `Feature-Policy` or `Permissions-Policy` **Response Header** stating so.
@@ -34,17 +34,17 @@ Other sites should work as long as they are using **HTML5** elements of type `HT
 | **Netflix**<br>`https://www.netflix.com` | Fully Working | No known issues. |
 | **Disney+**<br>`https://www.disneyplus.com` | ??? | Don't have a subscription and hence cannot test. Reports from other **AudioPick** users via [GitHub Issue](https://github.com/rain-fighters/AudioPick/issues) welcome. |
 
-#### Why isn't the extension available for **Other Browsers**, e. g. **Firefox**?
+### Why isn't the extension available for **Other Browsers**, e. g. **Firefox**?
 ...
 
-#### Where do I report **Issues** with the extension?
+### Where do I report **Issues** with the extension?
 ...
 
-#### How did you come up with the **Idea** for the extension?
+### How did you come up with the **Idea** for the extension?
 ...
 
-#### How can I **Support AudioPick**?
+### How can I **Support AudioPick**?
 ...
 
-#### What is or rather who are **Rain-Fighters**?
+### What is or rather who are **Rain-Fighters**?
 ...
