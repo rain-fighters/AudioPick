@@ -29,7 +29,7 @@ Other sites should work as long as they are using **HTML5** elements of type `HT
 | **YouTube Music**<br>`https://music.youtube.com` | Fully Working | No known issues. |
 | **Spotify**<br>`https://open.spotify.com` | Fully Working | No known issues. |
 | **SoundCloud**<br>`https://soundcloud.com`| Mostly Working | Might require a page reload when a new tab is opened through a link/bookmark to a specific track and autoplay starts before **AudioPick** is able to inject its `changeSinkId` listener properly. |
-| **Deezer**<br>`https://www.deezer.com` | Kinda Working | Requires to click `Play->Pause->Play` once after (re-)loading the page in order to help **AudioPick** to inject its `changeSinkId` listener properly. See [Issue #49 on GitHub](https://github.com/rain-fighters/AudioPick/issues/49). | 
+| **Deezer**<br>`https://www.deezer.com` | Kinda Working | Requires to click `Play->Pause->Play` once after (re-)loading the page in order to help **AudioPick** to inject its `changeSinkId` listener properly. | 
 | **Amazon Music**<br>`https://music.amazon.com` | Probably Working | The demo podcasts worked (without needing a subscription). |
 | **Netflix**<br>`https://www.netflix.com` | Fully Working | No known issues. |
 | **Disney+**<br>`https://www.disneyplus.com` | Maybe Working | Don't have a subscription and hence cannot test. Reports from other **AudioPick** users via [GitHub Issue](https://github.com/rain-fighters/AudioPick/issues) welcome. |
