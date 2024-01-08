@@ -58,21 +58,19 @@ h1, h2, h3, h4, h5, h6 {
 
 table {
 	margin: .75rem 0 .75rem 0;
-	border-collapse: collapse;
 	border: 0;
+	border-collapse: collapse;
+}
+
+th, td {
+	vertical-align: middle;
+	padding: .25rem;
+	border: 0;
+	border-bottom: 1px solid var(--border);
 }
 
 th {
-	padding: .25rem;
-	border: 0;
-	border-bottom: 1px solid var(--border);
 	font-weight: bold;
 	color: inherit;
 	background: inherit;
-}
-
-td {
-	padding: .25rem;
-	border: 0;
-	border-bottom: 1px solid var(--border);
 }
