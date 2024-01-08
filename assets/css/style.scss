@@ -60,9 +60,10 @@ table {
 }
 
 th {
+	font-weight: bold;
 	padding: .25rem;
-	background: linear-gradient(to top, var(--logo-gray),var(--logo-black));
 	border: 0;
+	background: linear-gradient(to top, var(--logo-gray),var(--logo-black));
 }
 
 td {
