@@ -25,6 +25,7 @@
 	--logo-black: #121322;
 	--text: #373737;
  	--bg: #f0f2f4;
+	--bg-accent: #e0e2e4;
 	--border: var(--logo-gray);
 }
 
@@ -34,7 +35,7 @@ body {
 }
 
 code, pre {
-	background-color: inherit;
+	background-color: var(--bg-accent);
 	font-family: var(--mono-font);
 	font-size: var(--mono-font-size);
 }
@@ -95,5 +96,5 @@ th {
 	font-family: inherit;
 	font-weight: bold;
 	color: inherit;
-	background: inherit;
+	background: var(--bg-accent);
 }
