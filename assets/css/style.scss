@@ -4,6 +4,14 @@
 @import "{{ site.theme }}";
 
 :root {
+	--sans-font: Noto, "Segoe UI", Calibri, Arial, Helvetica, sans-serif;
+	--mono-font: Consolas, "Noto Sans Mono", "Bitstream Vera Sans Mono", Menlo, Monaco, monospace;
+	--base-font-size: 1rem;
+	--medium-font-size: .9rem;
+	--mono-font-size: .8125rem;
+	--small-font-size: .8rem;
+	--tiny-font-size: .625rem;
+
 	--logo-red: #D04949;
 	--logo-green: #00C25E;
 	--logo-blue: #3D67FF;
@@ -16,9 +24,15 @@
 	--border: var(--logo-gray);
 }
 
+body {
+	font-family: var(--sans-font);
+	font-size: var(--base-font-size);
+}
+
 code, pre {
 	background-color: inherit;
-	font-size: .8125rem;
+	font-family: var(--mono-font);
+	font-size: var(--mono-font-size);
 }
 
 code {
@@ -54,6 +68,8 @@ p, ul, li, blockquote {
 }
 
 h1, h2, h3, h4, h5, h6 {
+	font-family: inherit;
+	letter-spacing: inherit;
 	margin: 1rem 0 0 0;
 }
 
@@ -72,6 +88,7 @@ th, td {
 }
 
 th {
+	font-family: inherit;
 	font-weight: bold;
 	color: inherit;
 	background: inherit;
