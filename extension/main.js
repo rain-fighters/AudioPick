@@ -10,7 +10,7 @@
 //   - Element.sinkListener               (property name)
 //   - document.queryShadowSelectorAll    (property name)
 //   - changeSinkId                       (message/event name)
-//
+
 // Observer function that will be called for any new nodes or shadowRoots.
 const APV3_UN1QU3_observer = new MutationObserver(function (mutations) {
 	// Check each mutation to see if nodes have been added.
@@ -22,35 +22,99 @@ const APV3_UN1QU3_observer = new MutationObserver(function (mutations) {
 	});
 });
 
+// Write to console.log, if debugging is enabled.
+function APV3_UN1QU3_debugMessage(...args) {
+	if (window.localStorage["APV3_UN1QU3_enableDebug"]) {
+		console.log('APV3-main.js', ...args);
+	}
+}
+
+// A pure JavaScript Promise-based Mutex implementation
+// Copied from https://github.com/mgtitimoli/await-mutex
+// Unlicensed. See https://unlicense.org/
+//
+// Might use this in a like this ...
+//	var APV3_UN1QU3_setSinkMutex = new APV3_UN1QU3_Mutex();
+//	async function withCriticalSection() {
+//		...
+//		let unlock = await APV3_UN1QU3_setSinkMutex.lock();
+//
+//		critical section
+//
+//		unlock();
+//	}
+
+class APV3_UN1QU3_Mutex {
+	constructor() {
+		this._locking = Promise.resolve();
+		this._locks = 0;
+	}
+
+	isLocked() {
+		return this._locks > 0;
+	}
+
+	lock() {
+		this._locks += 1;
+		let unlockNext;
+		let willLock = new Promise(resolve => unlockNext = () => {
+			this._locks -= 1;
+			resolve();
+		});
+		let willUnlock = this._locking.then(() => unlockNext);
+		this._locking = this._locking.then(() => willLock);
+		return willUnlock;
+	}
+}
+
+async function APV3_UN1QU3_maybeSetSinkId(targetElement, trigger, sinkId) {
+	if (sinkId === "default") {
+		sinkId = "";
+	}
+	if (sinkId === targetElement.sinkId) {
+		return true;
+	}
+	if ((targetElement instanceof HTMLMediaElement) && (targetElement.sourceOfAudioContext)) {
+		// Skip setsinkId() on HTMLMediaElement(s)s that were used to
+		// create MediaElementAudioSourceNode(s) of an AudioContext.
+		APV3_UN1QU3_debugMessage("| " + trigger + "(skip):", targetElement.constructor.name, "| targetElement:", targetElement,
+				"| sourceOfAudioContext:", targetElement.sourceOfAudioContext, "| foundViaMethod:", targetElement.foundViaMethod);
+		return false;
+	}
+	try {
+		APV3_UN1QU3_debugMessage("| " + trigger + "(try):", targetElement.constructor.name, "| targetElement:", targetElement,
+			"| sourceOfAudioContext:", targetElement.sourceOfAudioContext, "| foundViaMethod:", targetElement.foundViaMethod,
+			"| oldSinkId:", targetElement.sinkId, "| sinkId:", sinkId);
+		await targetElement.setSinkId(sinkId);
+		return true;
+	} catch(error) {
+		APV3_UN1QU3_debugMessage("| " + trigger + "(catch):", targetElement.constructor.name, "| targetElement:", targetElement,
+			"| sourceOfAudioContext:", targetElement.sourceOfAudioContext, "| foundViaMethod:", targetElement.foundViaMethod,
+			"| error:", error);
+		return false;
+	}
+}
+
 // The function we call to initially add the eventListener and set the sinkId.
 // Can be called on any HTMLMediaElement or descendants.
-async function APV3_UN1QU3_addListenerAndSetSinkId(targetElement) {
+async function APV3_UN1QU3_addListenerAndSetSinkId(targetElement, method) {
+	targetElement.foundViaMethod = method;
 	if (typeof(targetElement.sinkListener) !== "function") {
 		targetElement.sinkListener = function (e) {
-			if (e.detail === "default") {
-				// If the sinkId is for the default device submit a blank string.
-				// AudioContext elements don't support "default" as a value.
-				// Non-AudioContext elements support both "default" and "".
-				targetElement.setSinkId("");
-			} else {
-				// Otherwise set the sinkId to the value provided by the event.
-				targetElement.setSinkId(e.detail);
-			}
+			APV3_UN1QU3_maybeSetSinkId(targetElement, "changeSinkId", e.detail);
 		}
 		// Add event listener to top for ease of event management.
 		window.addEventListener("changeSinkId", targetElement.sinkListener, true);
-	}
-	// Only try to set the sinkId if we have an activeSinkId already.
-	if (typeof window.activeSinkId !== "undefined") {
-		if (window.activeSinkId === "default") {
-			// If the sinkId is for the default device submit a blank string.
-			// AudioContext elements don't support "default" as a value.
-			// Non-AudioContext elements support both "default" and "".
-			targetElement.setSinkId("");
-		} else {
-			// Otherwise set the sinkId to the value stored in global var.
-			targetElement.setSinkId(window.activeSinkId);
+		// Only try to set the sinkId, if we have an activeSinkId already.
+		// ... and only once when (only) found via addEventListener_*_hook
+		if ((typeof window.activeSinkId !== "undefined") && method.startsWith("addEventListener_")) {
+			await APV3_UN1QU3_maybeSetSinkId(targetElement, "setSinkId", window.activeSinkId);
 		}
+	}
+	// Only try to set the sinkId, if we have an activeSinkId already.
+	// ... and only once when (only) found via addEventListener_*_hook
+	if ((typeof window.activeSinkId !== "undefined") && !method.startsWith("addEventListener_")) {
+		await APV3_UN1QU3_maybeSetSinkId(targetElement, "setSinkId", window.activeSinkId);
 	}
 }
 
@@ -74,46 +138,39 @@ async function APV3_UN1QU3_recursiveSetSinkId(node) {
 	}
 	// If the current node is an audio/video node then set the sinkId.
 	if ((node.nodeName === "AUDIO") || (node.nodeName === "VIDEO")) {
-		await APV3_UN1QU3_addListenerAndSetSinkId(node);
+		await APV3_UN1QU3_addListenerAndSetSinkId(node, "observer_recursiveSetSinkId");
 	}
 	// Process all children.
 	await Promise.all(queue);
 	return true;
 }
 
-// Hook Element.prototype.attachShadow so we see any shadowRoots created.
-function APV3_UN1QU3_hookElement_attachShadow() {
+// Hook some HTMLMediaElement.prototype methods to catch
+// elements that are created outside of the DOM tree.
+function APV3_UN1QU3_hookHTMLMediaElement_various() {
+	// Alias HTMLMediaElement.prototype to allow for shorter line length.
+	const ME = HTMLMediaElement.prototype;
 	// Don't double-hook if we already did in this context.
-	if (typeof(Element.prototype.attachShadow_noHook) !== "function") {
-		// Save the original function for callback.
-		Element.prototype.attachShadow_noHook = Element.prototype.attachShadow;
+	if (typeof(ME.play_noHook) !== "function") {
+		// Save the original functions for callback.
+		ME.play_noHook = ME.play;
+		ME.load_noHook = ME.load;
+		ME.addEventListener_noHook = ME.addEventListener;
 	}
-	// Set our hook.
-	Element.prototype.attachShadow = function(options) {
-		// Create the shadowRoot with the original function.
-		var s = this.attachShadow_noHook.apply(this, arguments);
-		// Attach our observer to watch for any changes.
-		APV3_UN1QU3_observer.observe(s, {childList: true,subtree: true});
-		// Recursively set sinkIDs on any existing children.
-		APV3_UN1QU3_recursiveSetSinkId(s);
-		// Return the requested shadowRoot.
-		return s;
-	};
-}
-
-// Hook HTMLMediaElement.prototype.play to catch any elements
-// that are created outside of the DOM tree.
-function APV3_UN1QU3_hookHTMLMediaElement_play() {
-	// Don't double-hook if we already did in this context.
-	if (typeof(HTMLMediaElement.prototype.play_noHook) !== "function") {
-		// Save the original function for callback.
-		HTMLMediaElement.prototype.play_noHook = HTMLMediaElement.prototype.play;
-	}
-	// Set our hook
-	HTMLMediaElement.prototype.play = function(...args) {
-		APV3_UN1QU3_addListenerAndSetSinkId(this);
-		// Pass the play request to the original function.
+	// Set our hooks
+	// Each hooked function simply calls addListenerAndSetSinkId on the object
+	// before calling and returning the value from the original function.
+	ME.play = function(...args) {
+		APV3_UN1QU3_addListenerAndSetSinkId(this, "play_hook");
 		return this.play_noHook.apply(this, args);
+	};
+	ME.load = function(...args) {
+		APV3_UN1QU3_addListenerAndSetSinkId(this, "load_hook");
+		return this.load_noHook.apply(this, args);
+	};
+	ME.addEventListener = function(...args) {
+		APV3_UN1QU3_addListenerAndSetSinkId(this, "addEventListener_" + args[0] + "_hook");
+		return this.addEventListener_noHook.apply(this, args);
 	};
 }
 
@@ -133,20 +190,43 @@ function APV3_UN1QU3_hookAudioContext_create() {
 	// Each hooked function simply calls addListenerAndSetSinkId on the object
 	// before calling and returning the value from the original function.
 	AC.createMediaElementSource = function(...args) {
-		APV3_UN1QU3_addListenerAndSetSinkId(this);
+		APV3_UN1QU3_addListenerAndSetSinkId(this, "createMediaElementSource_hook");
+		// Mark the HTMLMediaElement (args[0]) used to create the MediaElementAudioSourceNode
+		// as being used by an AudioContext to prevent calling setSinkId() on it.
+		args[0].sourceOfAudioContext = true;
 		return this.createMediaElementSource_noHook.apply(this, args);
 	};
 	AC.createMediaStreamSource = function(...args) {
-		APV3_UN1QU3_addListenerAndSetSinkId(this);
+		APV3_UN1QU3_addListenerAndSetSinkId(this, "createMediaStreamSource_hook");
 		return this.createMediaStreamSource_noHook.apply(this, args);
 	};
 	AC.createMediaStreamDestination = function(...args) {
-		APV3_UN1QU3_addListenerAndSetSinkId(this);
+		APV3_UN1QU3_addListenerAndSetSinkId(this, "createMediaStreamDestination_hook");
 		return this.createMediaStreamDestination_noHook.apply(this, args);
 	};
 	AC.createMediaStreamTrackSource = function(...args) {
-		APV3_UN1QU3_addListenerAndSetSinkId(this);
+		APV3_UN1QU3_addListenerAndSetSinkId(this, "createMediaStreamTrackSource_hook");
 		return this.createMediaStreamTrackSource_noHook.apply(this, args);
+	};
+}
+
+// Hook Element.prototype.attachShadow so we see any shadowRoots created.
+function APV3_UN1QU3_hookElement_attachShadow() {
+	// Don't double-hook if we already did in this context.
+	if (typeof(Element.prototype.attachShadow_noHook) !== "function") {
+		// Save the original function for callback.
+		Element.prototype.attachShadow_noHook = Element.prototype.attachShadow;
+	}
+	// Set our hook.
+	Element.prototype.attachShadow = function(options) {
+		// Create the shadowRoot with the original function.
+		var s = this.attachShadow_noHook.apply(this, arguments);
+		// Attach our observer to watch for any changes.
+		APV3_UN1QU3_observer.observe(s, {childList: true,subtree: true});
+		// Recursively set sinkIDs on any existing children.
+		APV3_UN1QU3_recursiveSetSinkId(s);
+		// Return the requested shadowRoot.
+		return s;
 	};
 }
 
@@ -184,11 +264,11 @@ async function APV3_UN1QU3_processAllMediaElements() {
 	var queue = [];
 	// Prepare to set sinkId on all audio/video nodes not in shadowRoots.
 	document.querySelectorAll("audio,video").forEach(function(node) {
-		queue.push(APV3_UN1QU3_addListenerAndSetSinkId(node));
+		queue.push(APV3_UN1QU3_addListenerAndSetSinkId(node, "processAllMediaElements_normal"));
 	});
 	// Prepare to set sinkId on all audio/video nodes in shadowRoots.
 	document.queryShadowSelectorAll("audio,video").forEach(function (node) {
-		queue.push(APV3_UN1QU3_addListenerAndSetSinkId(node));
+		queue.push(APV3_UN1QU3_addListenerAndSetSinkId(node, "processAllMediaElements_shadow"));
 	});
 	// Process all located nodes.
 	ret = await Promise.all(queue);
@@ -196,8 +276,8 @@ async function APV3_UN1QU3_processAllMediaElements() {
 }
 
 // Load hooks first.
+APV3_UN1QU3_hookHTMLMediaElement_various();
 APV3_UN1QU3_hookAudioContext_create();
-APV3_UN1QU3_hookHTMLMediaElement_play();
 APV3_UN1QU3_hookElement_attachShadow();
 // Then start observing the document.
 APV3_UN1QU3_observer.observe(document.documentElement, {childList: true,subtree: true});

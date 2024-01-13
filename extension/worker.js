@@ -68,7 +68,7 @@ function onMessage(request, sender, sendResponse) {
 					)
 				);
 			},
-			target : {tabId : sender.tab.id, allFrames : true},
+			target : {tabId : sender.tab.id, allFrames : false},
 			world: "MAIN"
 		});
 		break;

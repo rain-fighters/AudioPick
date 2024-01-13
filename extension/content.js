@@ -142,6 +142,7 @@ async function setAudioDevice(deviceName) {
 async function init() {
 	// If we're top read settings from storage and set the active device.
 	if (window === top) {
+		window.localStorage["APV3_UN1QU3_enableDebug"] = true;
 		// Start listening for messages.
 		chrome.runtime.onMessage.addListener(onMessage);
 		// Get our domain string prefix from the worker.
