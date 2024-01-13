@@ -46,6 +46,11 @@ function checkbox_OnChange(e) {
 	} else {
 		chrome.storage.local.set({"enableDebug": false});
 	}
+	// Don't try to pass a boolean here ... JavaScript sucks!
+	chrome.tabs.sendMessage(activeTab.id, {
+		action: "updateDebug",
+		value: e.target.checked ? "yes" : "no"
+	});
 }
 
 // Click handler used for all buttons on the popup.

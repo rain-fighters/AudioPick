@@ -21,6 +21,11 @@ function debugMessage(...args) {
 // registers this message listener.
 function onMessage(request, sender, sendResponse) {
 	switch(request.action) {
+		case "updateDebug":
+			// The extension popup has changed chrome.storage.local["enableDebug"].
+			// Don't try to pass a boolean here ... JavaScript sucks!
+			window.localStorage.setItem("APV3_UN1QU3_enableDebug", request.value);
+			break;
 		case "setActiveDevice":
 			// The extension popup is asking us to set a new active device.
 			setAudioDevice(request.device);
@@ -142,7 +147,13 @@ async function setAudioDevice(deviceName) {
 async function init() {
 	// If we're top read settings from storage and set the active device.
 	if (window === top) {
-		window.localStorage["APV3_UN1QU3_enableDebug"] = true;
+		result = await chrome.storage.local.get(["enableDebug"]);
+		if (result && result.enableDebug) {
+			// Don't try to pass a boolean here ... JavaScript sucks!
+			window.localStorage.setItem("APV3_UN1QU3_enableDebug", "yes");
+		} else {
+			window.localStorage.setItem("APV3_UN1QU3_enableDebug", "no");
+		}
 		// Start listening for messages.
 		chrome.runtime.onMessage.addListener(onMessage);
 		// Get our domain string prefix from the worker.

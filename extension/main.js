@@ -24,7 +24,8 @@ const APV3_UN1QU3_observer = new MutationObserver(function (mutations) {
 
 // Write to console.log, if debugging is enabled.
 function APV3_UN1QU3_debugMessage(...args) {
-	if (window.localStorage["APV3_UN1QU3_enableDebug"]) {
+	// Don't try to pass a boolean here ... JavaScript sucks!
+	if (window.localStorage.getItem("APV3_UN1QU3_enableDebug") === "yes") {
 		console.log('APV3-main.js', ...args);
 	}
 }
@@ -43,7 +44,7 @@ function APV3_UN1QU3_debugMessage(...args) {
 //
 //		unlock();
 //	}
-
+/*
 class APV3_UN1QU3_Mutex {
 	constructor() {
 		this._locking = Promise.resolve();
@@ -66,6 +67,7 @@ class APV3_UN1QU3_Mutex {
 		return willUnlock;
 	}
 }
+*/
 
 async function APV3_UN1QU3_maybeSetSinkId(targetElement, trigger, sinkId) {
 	if (sinkId === "default") {
