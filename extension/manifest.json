@@ -44,6 +44,8 @@
 	"permissions": [
 		"contentSettings",
 		"storage",
-		"scripting"
+		"scripting",
+		"activeTab",
+		"favicon"
 	]
 }

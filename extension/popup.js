@@ -1,6 +1,7 @@
 // Prefix used for our local storage variables.
 const storagePrefix = "preferredDevice_";
-var tabError = ""
+var tabError = "";
+var micPolicy = "unknown";
 var activeTab;
 var domainString;
 // Assume all devices are the system default until proven otherwise.
@@ -94,35 +95,105 @@ function button_OnClick(e) {
 	});
 }
 
+function addTitleRow(table, url, isDisabled) {
+	const siteUrl = function(url) {
+		if (typeof url === 'undefined') {
+			url = "undefined://undefined";
+		}
+		let proto = url.split("/")[0];
+		let host = url.split("/")[2];
+		if (proto === "https:") {
+			return url.split("/")[2];
+		} else {
+			return proto + "//" + host;
+		}
+	};
+	const favIconUrl = function(url) {
+		if (typeof url === 'undefined') {
+			return "./APV3_Icon_2d_2c_32.png"; /* a dedicated icon would be better */
+		}
+		const query = new URL(chrome.runtime.getURL("/_favicon/"));
+		query.searchParams.set("pageUrl", url);
+		query.searchParams.set("size", "32");
+		return query.toString();
+	};
+	const svgMicDeny = `
+		<svg xmlns="http://www.w3.org/2000/svg"
+			width="24" height="24" viewBox="0 0 24 24" fill="none"
+			stroke="currentColor" stroke-width="2" stroke-linecap="round"
+			stroke-linejoin="round" class="lucide lucide-mic-off">
+			<line x1="2" x2="22" y1="2" y2="22"/>
+			<path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2"/>
+			<path d="M5 10v2a7 7 0 0 0 12 5"/>
+			<path d="M15 9.34V5a3 3 0 0 0-5.68-1.33"/>
+			<path d="M9 9v3a3 3 0 0 0 5.12 2.12"/>
+			<line x1="12" x2="12" y1="19" y2="22"/>
+		</svg>
+	`;
+	const svgMicDefault = `
+		<svg xmlns="http://www.w3.org/2000/svg"
+			width="24" height="24" viewBox="0 0 24 24" fill="none"
+			stroke="currentColor" stroke-width="2" stroke-linecap="round"
+			stroke-linejoin="round" class="lucide lucide-mic">
+			<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+			<path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+			<line x1="12" x2="12" y1="19" y2="22"/>
+		</svg>
+	`;
+	let row = table.insertRow(-1);
+	let cell0 = row.insertCell(0);
+	let cell1 = row.insertCell(1);
+	let cell2 = row.insertCell(2);
+	let site = siteUrl(url);
+	let siteIcon = favIconUrl(url);
+	let imageNode = document.createElement("img");
+	let textNode = document.createTextNode(site + " - mic:" + micPolicy);
+	imageNode.src = siteIcon;
+	cell0.appendChild(imageNode);
+	cell1.appendChild(textNode);
+	if (isDisabled) {
+		row.classList.add("disabled");
+		/* micPolicy is either "unknown" or "denied" */
+		cell2.innerHTML = svgMicDeny;
+	} else {
+		/* micPolicy is either "prompt" or "granted" */
+		cell2.innerHTML = svgMicDefault;
+	}
+	cell2.classList.add("micPolicy-" + micPolicy);
+}
+
 function addDeviceRow(table, deviceId, deviceLabel, isActive, isPreferred, isDisabled) {
-	var row = table.insertRow(-1);
-	var cell0 = row.insertCell(0);
-	var cell1 = row.insertCell(1);
-	var cell2 = row.insertCell(2);
-	var radioElement = document.createElement("input");
-	var labelElement = document.createElement("label");
-	var textNode = document.createTextNode("");
+	const reDevicePrefix = /^\s*\S+\s*-\s*/i;
+	let row = table.insertRow(-1);
+	let cell0 = row.insertCell(0);
+	let cell1 = row.insertCell(1);
+	let cell2 = row.insertCell(2);
+	let radioElement = document.createElement("input");
+	let labelElement = document.createElement("label");
 	radioElement.type = "radio";
 	radioElement.name = "device";
 	radioElement.id = deviceId;
-	// We use the device label as the activeDevice we pass to the tab.
+	// We use deviceLabel as the activeDevice we pass to the tab.
 	radioElement.value = deviceLabel;
 	radioElement.checked = isActive;
 	radioElement.disabled = isDisabled;
-	if (isDisabled) { row.classList.add("disabled"); }
+	if (isDisabled) {
+		row.classList.add("disabled");
+	}
 	// Make standard label for default devices & use provided for rest.
-	switch (deviceId) {
-		case "default":
-			textNode.textContent = "Default Audio Device";
-			break;
-		case "communications":
-			textNode.textContent = "Default Communications Device";
-			break;
-		default:
-			textNode.textContent = deviceLabel;
+	// On Windows and possibly MacOS the device labels for "default" and
+	// "communications" look like "Default|Communications - ACTUAL_DEVICE_NAME",
+	// but on Linux it's just "Default" ("communications" does not even exist).
+	// The following handles both cases.
+	let deviceSuffix = deviceLabel.replace(reDevicePrefix, ''); /* Strip prefix, if there is one*/
+	if ((deviceId === "default") && (deviceSuffix !== deviceLabel)) {
+		labelElement.innerHTML = 'Default <span>&ndash; ' + deviceSuffix + '</span>';
+	} else if ((deviceId === "communications") && (deviceSuffix !== deviceLabel)) {
+		labelElement.innerHTML = 'Communications <span>&ndash; ' + deviceSuffix + '</span>';
+	} else {
+		labelElement.innerHTML = deviceLabel;
 	}
 	labelElement.htmlFor = deviceId;
-	labelElement.appendChild(textNode);
 	cell0.appendChild(radioElement);
 	cell1.appendChild(labelElement);
 	if (isPreferred) {
@@ -133,18 +204,23 @@ function addDeviceRow(table, deviceId, deviceLabel, isActive, isPreferred, isDis
 }
 
 function buildDeviceTable(mediaDeviceInfo) {
-	var activeExists = false;
-	var domainExists = false;
-	var table = document.getElementById("device_options");
-
+	let activeExists = false;
+	let domainExists = false;
+	let table = document.getElementById("device_options");
 	// Remove all existing rows from the device table.
 	while (table.rows.length > 0) { table.deleteRow(0); }
-
+	// Show information about the activeTab's site in the first row,
+	// i. e. site (host/domain-name), favIcon and micPolicy
+	addTitleRow(table, activeTab.url, (tabError !== ""));
 	// Check, if we (still) find the tab's activeDevice and its domain's
 	// possibly stored "preferred device" (domainDevice) in our current
 	// list of "audiooutput" devices.
 	mediaDeviceInfo.forEach(function (device) {
-		if (device.kind === "audiooutput") {
+		// Filter out input devices.
+		// We no longer offer the "communications" device, but we still
+		// handle it as a special case everywhere else, e. g. remember
+		// the device.deviceId instead of device.label.
+		if ((device.kind === "audiooutput") && (device.deviceId !== "communications")) {
 			activeExists = activeExists ||
 				(device.label === activeDevice) || (device.deviceId === activeDevice);
 			domainExists = domainExists ||
@@ -152,7 +228,7 @@ function buildDeviceTable(mediaDeviceInfo) {
 		}
 	});
 	// Pick the best match (active > domain > "default") from the list of EXISTING
-	// "audiooutput" devices, so that it gets pre-checked in the device table.
+	// "audiooutput" devices, so that it gets pre-selected/checked in the device table.
 	if (!activeExists) {
 		if (domainExists) {
 			activeDevice = domainDevice;
@@ -160,11 +236,14 @@ function buildDeviceTable(mediaDeviceInfo) {
 			activeDevice = "default";
 		}
 	}
-
 	// Generate our device entries.
 	mediaDeviceInfo.forEach(function (device) {
 		// Filter out input devices.
-		if (device.kind === "audiooutput") {
+		// We no longer offer the "communications" device, but we still
+		// handle it as a special case everywhere else, e. g. remember
+		// device.deviceId instead of device.label.
+		if ((device.kind === "audiooutput") && (device.deviceId !== "communications")) {
+			console.log(device);
 			var isActive = false;
 			var isPreferred= false;
 			if (tabError === "") { // tab is valid and has a content script
@@ -181,7 +260,7 @@ function buildDeviceTable(mediaDeviceInfo) {
 		}
 	});
 	// If the preferred device no longer exists, e. g. was removed or renamed,
-	// we add a disabled entry indicating this to the user.
+	// we add a disabled entry to signal this fact to the user.
 	if (domainDevice && !domainExists) {
 		addDeviceRow(table, "unknownId", domainDevice, false, true, true);
 	}
@@ -234,6 +313,7 @@ async function init() {
 			const response = await chrome.tabs.sendMessage(activeTab.id, {
 				action: "getMicPolicy"
 			});
+			micPolicy = response;
 			if (response === "denied")  {
 				tabError = "Site denies microphone access.";
 			}

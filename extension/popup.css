@@ -1,12 +1,19 @@
 :root {
+	/* Fonts we have used originally
 	--sans-font: Noto, "Segoe UI", Arial, Helvetica, sans-serif;
 	--mono-font: Consolas, "Noto Sans Mono", Menlo, Monaco, monospace;
+	*/
+
+	/* GitHub websafe fonts */
+	--sans-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+	--mono-font: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
 	--base-font-size: 1rem;
 	--medium-font-size: .9rem;
 	--mono-font-size: .8125rem;
 	--small-font-size: .8rem;
 	--tiny-font-size: .625rem;
-	--line-height: 1.618;
+	--line-height: 1.5;
 	--min-content-width: 38rem;
 
 	--logo-red: #D04949;
@@ -26,7 +33,6 @@
 	--accent-light: var(--logo-green);
 	--code: var(--text);
 	--preformatted: var(--text);
-	--marked: #FFDD33;
 	--disabled: #808080;
 }
 
@@ -41,7 +47,6 @@
 		--accent-light: var(--logo-green);
 		--code: var(--text);
 		--preformatted: var(--text);
-		--marked: #FFDD33;
 		--disabled: #808080;
 	}
 }
@@ -133,16 +138,42 @@ td {
 	border-bottom: 1px solid var(--bg);
 }
 
-td:first-child { /* <input type="radio"/>  */
+tr:first-child td {
+	border-top: 1px solid var(--border);
+	border-bottom: 1px solid var(--border);
+}
+
+tr:nth-child(2) td {
+	border-top: 1px solid var(--border);
+}
+
+tr:first-child td:first-child img { /* table first row, favicon */
+	padding: 0;
+	margin: auto;
+	width: 1.25rem;
+	height: 1.25rem;
+	text-align: center;
+	vertical-align: baseline;
+}
+
+tr:first-child td:nth-child(2) { /* table first row, site */
+	font-family: var(--mono-font);
+	font-size: var(--mono-font-size);
+	font-weight: bold;
+	overflow-wrap: anywhere;
+}
+
+/* from second row onwards ... */
+tr ~ tr td:first-child { /* <input type="radio"/>  */
 	width: 0;
 	text-align: center;
 }
 
-td:nth-child(2) { /* <label>...</label> */
+tr ~ tr td:nth-child(2) { /* <label>...</label> */
 	min-width: 90%;
 }
 
-td:nth-child(3) { /* <text>&&#9733;</text> */
+tr ~ tr td:nth-child(3) { /* <text>&&#9733;</text> */
 	width: 0;
 	text-align: right;
 	color: var(--logo-yellow);
@@ -153,14 +184,34 @@ tr.disabled > td {
 	font-style: italic;
 }
 
+tr.disabled > td img {
+	opacity: 0.75;
+}
+
+td.micPolicy-prompt {
+	color: var(--logo-blue);
+}
+
+td.micPolicy-granted {
+	color: var(--logo-green);
+}
+
+tr.disabled td.micPolicy-denied {
+	color: var(--logo-red);
+}
+
 td label {
 	font-family: var(--mono-font);
 	font-size: var(--mono-font-size);
 	overflow-wrap: anywhere;
 }
 
+td label span {
+	color: var(--disabled);
+	font-style: italic;
+}
+
 main nav {
-	margin-top: 0.5rem;
 	display: flex;
 	justify-content: space-between;
 	flex-direction: row;
@@ -178,6 +229,10 @@ main nav.options div label {
 	font-family: var(--sans-font);
 	font-size: var(--small-font-size);
 	vertical-align: bottom;
+}
+
+main nav.buttons {
+	margin-top: 0.5rem;
 }
 
 button {
