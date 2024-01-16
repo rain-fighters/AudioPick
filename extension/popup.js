@@ -8,6 +8,38 @@ var domainString;
 var domainDevice = "default";
 var activeDevice = "default";
 
+// Write to console.log, if debugging is enabled.
+function debugMessage(...args) {
+	chrome.storage.local.get(["enableDebug"]).then(function(result) {
+		if (result && result.enableDebug) {
+			console.log('APV3-popup.js', ...args);
+		}
+	});
+}
+
+// OnChange handler for our smart checkbox
+function checkboxSmart_OnChange(e) {
+	if (e.target.checked === true) {
+		chrome.storage.local.set({"enableSmart": true});
+	} else {
+		chrome.storage.local.set({"enableSmart": false});
+	}
+}
+
+// OnChange handler for our debug checkbox
+function checkboxDebug_OnChange(e) {
+	if (e.target.checked === true) {
+		chrome.storage.local.set({"enableDebug": true});
+	} else {
+		chrome.storage.local.set({"enableDebug": false});
+	}
+	// Don't try to pass a boolean here ... JavaScript sucks!
+	chrome.tabs.sendMessage(activeTab.id, {
+		action: "updateDebug",
+		value: e.target.checked ? "yes" : "no"
+	});
+}
+
 // Sets microphone access using contentSettings API.
 async function setMicAccess(pattern, value) {
 	await chrome.contentSettings.microphone.set({
@@ -22,54 +54,93 @@ async function setMicAccess(pattern, value) {
 	return true;
 }
 
-// Clear all our microphone contentSettings.
-// Sadly there is no way to just clear our setting for a
-// specific pattern (site), but we might still use this
-//   - either whenever the popup is opened
-//   - or via an UI element (button) in the poopup.
-// TODO. Decide, how/whether to use this.
-async function clearMicAccess() {
-	await chrome.contentSettings.microphone.clear({
-		scope: (
-			activeTab.incognito
-			? "incognito_session_only"
-			: "regular"
-		)
+// Throw away all microphone permissions managed by us and re-acquire access
+// - for domains wich have stored/starred non-default devices
+// - for domains from any (currently open) secure (https) tab
+//   with a non-default activeDevice
+// - and for ourselves
+// Optionally exclude the (id of the) activeTab for which we are about
+// to set a possibly new device which may no longer require access.
+async function smartMicAccess(excludedTabId) {
+	const clearMicAccess = async function() {
+		await chrome.contentSettings.microphone.clear({
+			scope: (
+				activeTab.incognito
+				? "incognito_session_only"
+				: "regular"
+			)
+		});
+		return true;
+	}
+	// Remove all microphone permissions managed by us
+	await clearMicAccess();
+	// (Re-)Acquire extension's microphone access so we (the popup)
+	// can access non-default audio devices when we list them.
+	await setMicAccess("*://" + chrome.runtime.id + "/*", "allow");
+	// Re-acquire microphone access for domains
+	// with a stored/starred non-default device.
+	let items = await chrome.storage.local.get(null);
+	for (let [key, value] of Object.entries(items)) {
+		if (key.startsWith(storagePrefix)) {
+			if (value !== "default") {
+				let micPattern = "https://" + key.replace(storagePrefix, "") + "/*";
+				debugMessage("| smartMicAccess(starredDom): allow:", micPattern);
+				await setMicAccess(micPattern, "allow");
+			}
+		}
+	}
+	// Re-acquire microphone access for domains
+	// from secure tabs with a non-default device.
+	let secureTabs = await chrome.tabs.query({ url: "https://*/*" });
+	secureTabs.forEach(async function(tab) {
+		let micPattern = "https://" + tab.url.split("/")[2] + "/*";
+		if (tab.id === excludedTabId) {
+			debugMessage("| smartMicAccess(secureTabs): skip excluded:", micPattern);
+			return;
+		}
+		try {
+			const response = await chrome.tabs.sendMessage(tab.id, {
+				action: "getActiveDevice"
+			});
+			if (response && (response !== "default")) {
+				debugMessage("| smartMicAccess(secureTabs): allow:", micPattern);
+				await setMicAccess(micPattern, "allow");
+			}
+		} catch {
+			debugMessage("| smartMicAccess(secureTabs): no response:", micPattern);
+		}
 	});
 	return true;
 }
 
-// OnChange handler for our debug checkbox
-function checkbox_OnChange(e) {
-	console.log("checkbox_OnChange: ", e, e.target.id)
-	if (e.target.checked === true) {
-		chrome.storage.local.set({"enableDebug": true});
-	} else {
-		chrome.storage.local.set({"enableDebug": false});
-	}
-	// Don't try to pass a boolean here ... JavaScript sucks!
-	chrome.tabs.sendMessage(activeTab.id, {
-		action: "updateDebug",
-		value: e.target.checked ? "yes" : "no"
-	});
-}
-
 // Click handler used for all buttons on the popup.
 function button_OnClick(e) {
-	// Just close the window, when cancel has been clicked,
+	// Just close the window, when cancel has been clicked.
 	if (e.target.id === "cancel") {
 		window.close();
 		return;
 	}
-	// Check which device has been selected.
-	var selected = document.querySelectorAll("input[type='radio']:checked")[0];
-	// Create domain pattern in case we need to set Mic access.
-	var micPattern = activeTab.url.split("/")[0] + "//";
-	micPattern = micPattern + activeTab.url.split("/")[2] + "/*";
-	if (selected.id === "default") {
-		// If the default device is selected we don't need Mic access.
-		// Set permission for site back to "ask".
-		setMicAccess(micPattern, "ask");
+	let selected = document.querySelectorAll("input[type='radio']:checked")[0];
+	// Remove stored/starred device for domain, if reverting to "default".
+	if ((e.target.id === "applyStar") && (selected.id === "default")) {
+		chrome.storage.local.remove([domainString]);
+	}
+	let checkboxSmart = document.getElementById("checkbox_smart");
+	if (!checkboxSmart.checked) {
+		// If the default device is selected, we don't need microphone access.
+		// Note that this still marks the microphone permission as managed
+		// by the extension, i. e. it cannot be changed by the user.
+		// That's one reason, we added smartMicAccess() ...
+		if (selected.id === "default") {
+			let micPattern = activeTab.url.split("/")[0] + "//";
+			micPattern = micPattern + activeTab.url.split("/")[2] + "/*";
+			setMicAccess(micPattern, "ask");
+		}
+	} else {
+		// Do not re-acquire microphone permissions for the activeTab,
+		// since we are doing this implicitely (when needed) below
+		// through sending a "setActiveDevice" message.
+		smartMicAccess(activeTab.id);
 	}
 	if ((selected.id === "default") || (selected.id === "communications")) {
 		// If the default audio or comms device was selected we use their ID.
@@ -87,7 +158,7 @@ function button_OnClick(e) {
 	}).then(function () {
 		// If we're here because the user clicked the "applyStar" button,
 		// we save the selection as "preferred" to the local storage.
-		if (e.target.id === "applyStar") {
+		if ((e.target.id === "applyStar") && (activeDevice !== "default")) {
 			chrome.storage.local.set({[domainString]: activeDevice });
 		}
 		// Close the popup.
@@ -110,7 +181,10 @@ function addTitleRow(table, url, isDisabled) {
 	};
 	const favIconUrl = function(url) {
 		if (typeof url === 'undefined') {
-			return "./APV3_Icon_2d_2c_32.png"; /* a dedicated icon would be better */
+			// A dedicated icon would be better, but this is
+			// a really rare case, e. g. opening a tab for
+			// "chrome-extension://" + chrome.runtime.id + "/popup.html"
+			return "./APV3_Icon_2d_2c_32.png";
 		}
 		const query = new URL(chrome.runtime.getURL("/_favicon/"));
 		query.searchParams.set("pageUrl", url);
@@ -153,10 +227,10 @@ function addTitleRow(table, url, isDisabled) {
 	cell1.appendChild(textNode);
 	if (isDisabled) {
 		row.classList.add("disabled");
-		/* micPolicy is either "unknown" or "denied" */
+		// micPolicy is either "unknown" or "denied"
 		cell2.innerHTML = svgMicDeny;
 	} else {
-		/* micPolicy is either "prompt" or "granted" */
+		// micPolicy is either "prompt" or "granted"
 		cell2.innerHTML = svgMicDefault;
 	}
 	cell2.classList.add("micPolicy-" + micPolicy);
@@ -244,9 +318,8 @@ function buildDeviceTable(mediaDeviceInfo) {
 		// handle it as a special case everywhere else, e. g. remember
 		// device.deviceId instead of device.label.
 		if ((device.kind === "audiooutput") && (device.deviceId !== "communications")) {
-			console.log(device);
-			var isActive = false;
-			var isPreferred= false;
+			let isActive = false;
+			let isPreferred = false;
 			if (tabError === "") { // tab is valid and has a content script
 				// Is this the tab's activeDevice?
 				if ((device.label === activeDevice) || (device.deviceId === activeDevice)) {
@@ -268,15 +341,22 @@ function buildDeviceTable(mediaDeviceInfo) {
 }
 
 async function init() {
-	var status = document.getElementById("status_message");
-	var checkbox = document.getElementById("checkbox_debug");
-	var result = await chrome.storage.local.get("enableDebug");
-	if (result && result.enableDebug) {
-		checkbox.checked = true;
+	let status = document.getElementById("status_message");
+	let checkboxDebug = document.getElementById("checkbox_debug");
+	let checkboxSmart = document.getElementById("checkbox_smart");
+	let storageResult = await chrome.storage.local.get(["enableDebug", "enableSmart"]);
+	if (storageResult && storageResult.enableDebug) {
+		checkboxDebug.checked = true;
 	} else {
-		checkbox.checked = false;
+		checkboxDebug.checked = false;
 	}
-	checkbox.onchange = checkbox_OnChange;
+	checkboxDebug.onchange = checkboxDebug_OnChange;
+	if (storageResult && storageResult.enableSmart) {
+		checkboxSmart.checked = true;
+	} else {
+		checkboxSmart.checked = false;
+	}
+	checkboxSmart.onchange = checkboxSmart_OnChange;
 	// Get the current active / calling tab.
 	[activeTab] = await chrome.tabs.query({
 		active: true,
@@ -293,8 +373,6 @@ async function init() {
 		const storage = await chrome.storage.local.get([domainString]);
 		if (storage[domainString]) {
 			domainDevice = storage[domainString];
-			// Nope, we should not assume this!
-			// activeDevice = domainDevice;
 		}
 		// Get the active device from the current tab.
 		try {
@@ -324,12 +402,6 @@ async function init() {
 	}
 	// Display the current tab status/error.
 	status.innerHTML = tabError;
-
-	// Clear all microphone access permissions managed by our extension
-	// TODO: Decide whether to call this here, call it via a popup button
-	// or not at all.
-	// await clearMicAccess();
-
 	// Set our extensions microphone access permissions so we (the popup)
 	// can access non-default audio devices when we list them.
 	await setMicAccess("*://" + chrome.runtime.id + "/*", "allow");

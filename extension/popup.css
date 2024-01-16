@@ -115,10 +115,12 @@ header a h1 svg.lucide {
 }
 
 @keyframes blend-in-and-out {
-	0%   { opacity: 0.2; color: var(--animation-color); }
-	50%  { opacity: 1.0; color: var(--animation-color); }
-	75%  { opacity: 1.0; color: var(--animation-color); }
-	100% { opacity: 0.2; color: var(--animation-color); }
+	0%   { opacity: 1.0; color: var(--text-light); }
+	20%  { opacity: 0.2; color: var(--animation-color); }
+	40%  { opacity: 1.0; color: var(--animation-color); }
+	60%  { opacity: 1.0; color: var(--animation-color); }
+	80%  { opacity: 0.2; color: var(--animation-color); }
+	100% { opacity: 1.0; color: var(--text-light); }
 }
 
 header div {
@@ -136,7 +138,7 @@ header div {
 }
 
 header div:nth-child(2) { /* div for svg.lucide "chevrons-left" */
-	opacity: .75;
+	opacity: 1.0;
 	min-width: 2rem;
 }
 
@@ -263,10 +265,12 @@ main nav {
 	display: flex;
 	justify-content: space-between;
 	flex-direction: row;
+	align-items: center;
 }
 
 main nav.options div {
 	display: inline-block;
+	min-width: 2rem;
 }
 
 main nav.options div input {
