@@ -162,7 +162,10 @@ function APV3_UN1QU3_hookHTMLMediaElement_various() {
 	// Set our hooks
 	// Each hooked function simply calls addListenerAndSetSinkId on the object
 	// before calling and returning the value from the original function.
-	ME.play = function(...args) {
+	// Make hooks async when the hooked function returns a promise
+	// and we don't want to handle/catch possible errors, e. g. play() being
+	// denied due to autoplay restrictions.
+	ME.play = async function(...args) { /* async -> promise */
 		APV3_UN1QU3_addListenerAndSetSinkId(this, "play_hook");
 		return this.play_noHook.apply(this, args);
 	};
