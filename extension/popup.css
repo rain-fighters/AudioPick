@@ -34,6 +34,9 @@
 	--code: var(--text);
 	--preformatted: var(--text);
 	--disabled: #808080;
+
+	--animation-color: var(--logo-green);
+	--animation-play-state: running;
 }
 
 @media screen and (prefers-color-scheme: dark) {
@@ -48,6 +51,12 @@
 		--code: var(--text);
 		--preformatted: var(--text);
 		--disabled: #808080;
+	}
+}
+
+@media (prefers-reduced-motion) {
+	:root {
+		--animation-play-state: paused;
 	}
 }
 
@@ -66,7 +75,7 @@ body {
 	margin: auto;
 }
 
-header {
+header { /* a>h1>svg | div>svg | div>text | div>space | img */
 	background: var(--accent-bg);
 	border-bottom: 1px solid var(--border);
 	margin: 0;
@@ -74,6 +83,7 @@ header {
 	display: flex;
 	justify-content: space-between;
 	flex-direction: row;
+	align-items: center;
 	min-width: var(--min-content-width);
 }
 header img { width: 2rem; height: 2rem; }
@@ -98,19 +108,57 @@ svg.lucide {
 	height: 1rem;
 }
 
-h1 svg.lucide {
+header a h1 svg.lucide {
 	width: 1.25rem;
 	height: 1.25rem;
 	stroke-width: 3;
 }
 
-h1 {
+@keyframes blend-in-and-out {
+	0%   { opacity: 0.2; color: var(--animation-color); }
+	50%  { opacity: 1.0; color: var(--animation-color); }
+	75%  { opacity: 1.0; color: var(--animation-color); }
+	100% { opacity: 0.2; color: var(--animation-color); }
+}
+
+header div {
+	display: inline-block;
+	text-align: left;
+	font-size: var(--small-font-size);
+	color: var(--text-light);
+	animation-name: blend-in-and-out;
+	animation-delay: 1s;
+	animation-duration: 3s;
+	animation-iteration-count: 1;
+	animation-play-state: var(--animation-play-state);
+	opacity: 1.0;
+	min-width: 4rem;
+}
+
+header div:nth-child(2) { /* div for svg.lucide "chevrons-left" */
+	opacity: .75;
+	min-width: 2rem;
+}
+
+header div:nth-child(2) svg.lucide { /* svg.lucide "chevrons-left" */
+	width: 2rem;
+	height: 2rem;
+	stroke-width: 2;
+	display: block;
+	margin: auto;
+}
+
+header div:nth-child(3) { /* message */
+	width: 17rem;
+}
+
+h1 { /* only used in header */
 	font-size: calc(var(--base-font-size) * 1.25);
 	font-weight: bold;
 	margin: 0;
 }
 
-h2 {
+h2 { /* only used in main */
 	font-size: calc(var(--base-font-size) * 1.0);
 	font-weight: bold;
 	margin: 0;

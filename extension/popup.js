@@ -173,7 +173,8 @@ function addDeviceRow(table, deviceId, deviceLabel, isActive, isPreferred, isDis
 	radioElement.type = "radio";
 	radioElement.name = "device";
 	radioElement.id = deviceId;
-	// We use deviceLabel as the activeDevice we pass to the tab.
+	// Store the deviceLabel as radioElement.value so we can
+	// pass it to the activeTab as the (new) activeDevice.
 	radioElement.value = deviceLabel;
 	radioElement.checked = isActive;
 	radioElement.disabled = isDisabled;
@@ -187,9 +188,9 @@ function addDeviceRow(table, deviceId, deviceLabel, isActive, isPreferred, isDis
 	// The following handles both cases.
 	let deviceSuffix = deviceLabel.replace(reDevicePrefix, ''); /* Strip prefix, if there is one*/
 	if ((deviceId === "default") && (deviceSuffix !== deviceLabel)) {
-		labelElement.innerHTML = 'Default <span>&ndash; ' + deviceSuffix + '</span>';
+		labelElement.innerHTML = 'Default <span>- ' + deviceSuffix + '</span>';
 	} else if ((deviceId === "communications") && (deviceSuffix !== deviceLabel)) {
-		labelElement.innerHTML = 'Communications <span>&ndash; ' + deviceSuffix + '</span>';
+		labelElement.innerHTML = 'Communications <span>- ' + deviceSuffix + '</span>';
 	} else {
 		labelElement.innerHTML = deviceLabel;
 	}
