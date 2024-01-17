@@ -344,7 +344,7 @@ async function init() {
 	let status = document.getElementById("status_message");
 	let checkboxDebug = document.getElementById("checkbox_debug");
 	let checkboxSmart = document.getElementById("checkbox_smart");
-	let storageResult = await chrome.storage.local.get(["enableDebug", "enableSmart"]);
+	let storageResult = await chrome.storage.local.get(["enableDebug", "enableSmart", "lastAnimated"]);
 	if (storageResult && storageResult.enableDebug) {
 		checkboxDebug.checked = true;
 	} else {
@@ -420,6 +420,17 @@ async function init() {
 			e.onclick = "";
 		}
 	});
+	if (storageResult) {
+		let now = Date.now() / 1000.0; // [seconds]
+		// Enable animation only once every hour (3600 seconds)
+		// Note that @media (prefers-reduced-motion) still disables animations entirely.
+		if (!storageResult.lastAnimated || ((now - storageResult.lastAnimated) > 3600.0)) {
+			document.querySelectorAll("header div").forEach(function(div) {
+				div.classList.add("animation-enabled");
+			});
+			chrome.storage.local.set({"lastAnimated": now});
+		}
+	}
 }
 
 init();

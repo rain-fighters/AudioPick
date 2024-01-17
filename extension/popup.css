@@ -132,9 +132,13 @@ header div {
 	animation-delay: 1s;
 	animation-duration: 3s;
 	animation-iteration-count: 1;
-	animation-play-state: var(--animation-play-state);
+	animation-play-state: paused;
 	opacity: 1.0;
 	min-width: 4rem;
+}
+
+div.animation-enabled {
+	animation-play-state: var(--animation-play-state);
 }
 
 header div:nth-child(2) { /* div for svg.lucide "chevrons-left" */
