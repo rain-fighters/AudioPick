@@ -1,51 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>AudioPick</title>
-	<link rel="stylesheet" href="WebRTC/_/css/fonts.css"  type="text/css">
-	<link rel="stylesheet" href="WebRTC/_/css/main.css">
-	<link rel="stylesheet" href="WebRTC/css/main.css">
+	<title>AudioPick Demo Sources</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="icon" type="image/png" href="Icons/APV3_Icon_2d_2c_192.png">
+	<link rel="stylesheet" type="text/css" href="index.css">
 	<script src="index.js"></script>
 </head>
 <body>
-<div id="container">
-	<h1>Refererences</h1>
-	<table>
-		<tr><td>
-			<a href="https://webrtc.github.io/samples/src/content/devices/multi/" target="WebRTC_Orig">The WebRTC original sample</a>
-		</td></tr>
-		<tr><td>
-			<a href="https://github.com/webrtc/samples/tree/gh-pages/src/content/devices/multi" target="WebRTC_Source">Source (git) of the WebRTC sample</a>
-		</td></tr>
-		<tr><td>
-			<a href="https://robots.thoughtbot.com/how-to-make-a-chrome-extension" target="Tutorial_1">How to make a Chrome Extension by Gabe Berke-Williams</a>
-		</td></tr>
-	</table>
-	<p/>
-	<h1>Demo</h1>
-	<div id="sources">
-		<div>
-			<video title="local video file" controls loop poster="WebRTC/images/poster.jpg" preload="metadata">
-				<source src="WebRTC/video/chrome.webm" type="video/webm" />
-				<source src="WebRTC/video/chrome.mp4" type="video/mp4" />
-				<p>This browser does not support the video element.</p>
-			</video>
-		</div>
-		<div>
-			<audio title="local audio file" controls loop>
-				<source src="WebRTC/audio/audio.mp3" type="audio/mp3" />
-				<p>This browser does not support the audio element.</p>
-			</audio>
-			<div id="more_audio">
-				<button type="button" id="play_hidden_audio" onclick="play_hidden_audio()">Play/Pause Hidden</button>
-				<button type="button" id="add_visible_audio" onclick="add_visible_audio()">Add new Visible</button>
-				<button type="button" id="add_visible_shadow_audio" onclick="add_visible_shadow_audio()">Add Visible in shadowRoot</button>
-			</div>
-			<div id="even_more_audio"></div>
-		</div>
+<header>
+	<a href="https://rain-fighters.github.io/AudioPick/" target="_blank" tabindex="-1"
+		title="AudioPick Home">
+		<h1>AudioPick
+			<svg xmlns="http://www.w3.org/2000/svg"
+				width="24" height="24" viewBox="0 0 24 24" fill="none"
+				stroke="currentColor" stroke-width="2" stroke-linecap="round"
+				stroke-linejoin="round" class="lucide lucide-external-link">
+				<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+				<polyline points="15 3 21 3 21 9"/>
+				<line x1="10" x2="21" y1="14" y2="3"/>
+			</svg>
+		</h1>
+	</a>
+	<h3>WebRTC / Extension References &amp; Demo Sources</h3>
+	<img src="./Icons/APV3_Icon_2d_2c_128.png"/>
+</header>
+
+<main>
+<h2>WebRTC / Extension References</h2>
+	<nav class="toc"><ul>
+	<li><a href="https://webrtc.github.io/samples/src/content/devices/multi/"
+		 target="_WebRTC_Orig">The WebRTC original sample</a></li>
+	<li><a href="https://github.com/webrtc/samples/tree/gh-pages/src/content/devices/multi"
+		target="_WebRTC_Source">GitHub Source of the WebRTC sample</a></li>
+	<li><a href="https://developer.chrome.com/docs/extensions/reference/api"
+		target="_Chrome_Extension_API">Chrome Extension API documentation</a></li>
+	<li><a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions"
+		target="_Mozilla_Extension_Doc">Mozilla WebExtension documentation</a></li>
+	</ul></nav>
+<h2>Demo Sources</h2>
+<section id="video">
+<div class="video">
+	<h3>html5 video in top frame</h3>
+	<video title="local video file" controls loop
+		poster="WebRTC/images/poster.jpg" preload="metadata">
+		<source src="WebRTC/video/chrome.webm" type="video/webm" />
+		<source src="WebRTC/video/chrome.mp4" type="video/mp4" />
+		<p>This browser does not support the video element.</p>
+	</video>
+</div>
+<div class="video">
+	<h3>html5 video in sub frame (ifrane)</h3>
+	<iframe
+		src="https://www.youtube.com/embed/2GbtLpYvzFQ?si=M3PsjgH-LhB-yPeQ"
+		title="Emdedded YouTube Video"
+		allow="microphone; fullscreen"
+		sandbox="allow-scripts allow-same-origin allow-presentation">
+	</iframe>
+</div>
+</section>
+
+<section id="audio">
+<div class="audio">
+	<h3>html5 audio within DOM tree</h3>
+	<button type="button" id="play_dom_audio" onclick="play_dom_audio()">Play/Pause Visible</button>
+	<div id="div_dom_audio">
+		<audio id="dom_audio" title="local audio file" controls loop>
+			<source src="WebRTC/audio/audio.mp3" type="audio/mp3" />
+			<p>This browser does not support the audio element.</p>
+		</audio>
 	</div>
 </div>
+<div class="audio">
+	<h3>html5 audio detached from DOM tree</h3>
+	<button type="button" id="play_hidden_audio" onclick="play_hidden_audio()">Play/Pause Hidden</button>
+	<div id="div_hidden_audio">
+		<!-- placeholder -->
+		Nothing to see here!
+	</div>
+</div>
+<div class="audio">
+	<h3>Add new html5 audio into DOM tree</h3>
+	<button type="button" id="add_visible_audio" onclick="add_visible_audio()">Add new Visible</button>
+	<div id="div_visible_audio">
+		<!-- placeholder -->
+	</div>
+</div>
+<div class="audio">
+	<h3>Attach new html5 audio from ShadowRoot</h3>
+	<button type="button" id="add_visible_shadow_audio"
+		onclick="add_visible_shadow_audio()">Add Visible in shadowRoot</button>
+	<div id="div_visible_shadow_audio">
+		<!-- placeholder -->
+	</div>
+</div>
+<div class="audio">
+	<h3>Add visible AudioContext source</h3>
+	<button type="button" id="add_visible_audioContext_source"
+		onclick="add_visible_audioContext_source()">Add visible AudioContext Source</button>
+	<div id="div_visible_audioContext_source">
+		<!-- placeholder -->
+	</div>
+</div>
+<div class="audio">
+	<h3>Add hidden AudioContext</h3>
+	<button disabled type="button" id="add_hidden_audioContext"
+		onclick="add_hidden_audioContext()">Add hidden AudioContext</button>
+	<div id="div_hidden_audioContext">
+		<!-- placeholder -->
+	</div>
+</div>
+
+</section>
+</main>
+
+<footer>
+	<a href="https://github.com/rain-fighters/AudioPick/"
+		target="_AudioPick_GitHub" tabindex="-1"
+		title="AudioPick on GitHub">
+		GitHub
+		<svg xmlns="http://www.w3.org/2000/svg"
+			width="12" height="12" viewBox="0 0 24 24" fill="none"
+			stroke="currentColor" stroke-width="2" stroke-linecap="round"
+			stroke-linejoin="round" class="lucide lucide-external-link">
+			<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+			<polyline points="15 3 21 3 21 9"/>
+			<line x1="10" x2="21" y1="14" y2="3"/>
+		</svg>
+	</a>
+	<a href="https://rain-fighters.net/"
+		target="_RaindFighters_Home" tabindex="-1"
+		title="Rain-Fighters Home">
+		rain-fighters.net
+		<svg xmlns="http://www.w3.org/2000/svg"
+			width="24" height="24" viewBox="0 0 24 24" fill="none"
+			stroke="currentColor" stroke-width="2" stroke-linecap="round"
+			stroke-linejoin="round" class="lucide lucide-external-link">
+			<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+			<polyline points="15 3 21 3 21 9"/>
+			<line x1="10" x2="21" y1="14" y2="3"/>
+		</svg>
+	</a>
+</footer>
 </body>
 </html>
