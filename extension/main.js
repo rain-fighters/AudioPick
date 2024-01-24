@@ -6,7 +6,6 @@
 //
 // Unique prefix for our global variable and function names: APV3_UN1QU3_
 // More possible name collisions we currently do not address, e. g.
-//   - window.activeSink                  (property name)
 //   - Element.sinkListener               (property name)
 //   - document.queryShadowSelectorAll    (property name)
 //   - changeSinkId                       (message/event name)
@@ -24,50 +23,12 @@ const APV3_UN1QU3_observer = new MutationObserver(function (mutations) {
 
 // Write to console.log, if debugging is enabled.
 function APV3_UN1QU3_debugMessage(...args) {
-	// Don't try to pass a boolean here ... JavaScript sucks!
-	if (window.localStorage.getItem("APV3_UN1QU3_enableDebug") === "yes") {
-		console.log('APV3-main.js', ...args);
+	if (window.APV3_UN1QU3_enableDebug) {
+		console.log('APV3-main.js (' +
+			((window === top) ? 'top-origin: ' : 'sub-origin: ') +
+			window.location.origin + ')', ...args);
 	}
 }
-
-// A pure JavaScript Promise-based Mutex implementation
-// Copied from https://github.com/mgtitimoli/await-mutex
-// Unlicensed. See https://unlicense.org/
-//
-// Might use this in a like this ...
-//	var APV3_UN1QU3_setSinkMutex = new APV3_UN1QU3_Mutex();
-//	async function withCriticalSection() {
-//		...
-//		let unlock = await APV3_UN1QU3_setSinkMutex.lock();
-//
-//		critical section
-//
-//		unlock();
-//	}
-/*
-class APV3_UN1QU3_Mutex {
-	constructor() {
-		this._locking = Promise.resolve();
-		this._locks = 0;
-	}
-
-	isLocked() {
-		return this._locks > 0;
-	}
-
-	lock() {
-		this._locks += 1;
-		let unlockNext;
-		let willLock = new Promise(resolve => unlockNext = () => {
-			this._locks -= 1;
-			resolve();
-		});
-		let willUnlock = this._locking.then(() => unlockNext);
-		this._locking = this._locking.then(() => willLock);
-		return willUnlock;
-	}
-}
-*/
 
 async function APV3_UN1QU3_maybeSetSinkId(targetElement, trigger, sinkId) {
 	if (sinkId === "default") {
@@ -92,7 +53,7 @@ async function APV3_UN1QU3_maybeSetSinkId(targetElement, trigger, sinkId) {
 	} catch(error) {
 		APV3_UN1QU3_debugMessage("| " + trigger + "(catch):", targetElement.constructor.name, "| targetElement:", targetElement,
 			"| sourceOfAudioContext:", targetElement.sourceOfAudioContext, "| foundViaMethod:", targetElement.foundViaMethod,
-			"| error:", error);
+			"| oldSinkId:", targetElement.sinkId, "| sinkId:", sinkId, "| error:", error);
 		return false;
 	}
 }
@@ -109,14 +70,14 @@ async function APV3_UN1QU3_addListenerAndSetSinkId(targetElement, method) {
 		window.addEventListener("changeSinkId", targetElement.sinkListener, true);
 		// Only try to set the sinkId, if we have an activeSinkId already.
 		// ... and only once when (only) found via addEventListener_*_hook
-		if ((typeof window.activeSinkId !== "undefined") && method.startsWith("addEventListener_")) {
-			await APV3_UN1QU3_maybeSetSinkId(targetElement, "setSinkId", window.activeSinkId);
+		if ((typeof window.APV3_UN1QU3_activeSinkId !== "undefined") && method.startsWith("addEventListener_")) {
+			await APV3_UN1QU3_maybeSetSinkId(targetElement, "setSinkId", window.APV3_UN1QU3_activeSinkId);
 		}
 	}
 	// Only try to set the sinkId, if we have an activeSinkId already.
 	// ... and only once when (only) found via addEventListener_*_hook
-	if ((typeof window.activeSinkId !== "undefined") && !method.startsWith("addEventListener_")) {
-		await APV3_UN1QU3_maybeSetSinkId(targetElement, "setSinkId", window.activeSinkId);
+	if ((typeof window.APV3_UN1QU3_activeSinkId !== "undefined") && !method.startsWith("addEventListener_")) {
+		await APV3_UN1QU3_maybeSetSinkId(targetElement, "setSinkId", window.APV3_UN1QU3_activeSinkId);
 	}
 }
 
@@ -227,7 +188,7 @@ function APV3_UN1QU3_hookElement_attachShadow() {
 		// Create the shadowRoot with the original function.
 		var s = this.attachShadow_noHook.apply(this, arguments);
 		// Attach our observer to watch for any changes.
-		APV3_UN1QU3_observer.observe(s, {childList: true,subtree: true});
+		APV3_UN1QU3_observer.observe(s, {childList: true, subtree: true});
 		// Recursively set sinkIDs on any existing children.
 		APV3_UN1QU3_recursiveSetSinkId(s);
 		// Return the requested shadowRoot.
@@ -264,7 +225,6 @@ document.queryShadowSelectorAll = function(selectors, e = document) {
 };
 
 // Set the sinkId on every existing audio/video element.
-// This will be called by our injected function.
 async function APV3_UN1QU3_processAllMediaElements() {
 	var queue = [];
 	// Prepare to set sinkId on all audio/video nodes not in shadowRoots.

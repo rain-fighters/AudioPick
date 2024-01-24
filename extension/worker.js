@@ -9,35 +9,28 @@ const storagePrefix = "preferredDevice_";
 
 function onMessage(request, sender, sendResponse) {
 	switch (request.action) {
-	case "getDomainString":
-		// Return the storage prefix with the domain of the tab.
-		sendResponse(storagePrefix + sender.tab.url.split("/")[2]);
-		break;
-	case "getActiveSinkId":
-	case "getActiveDevice":
+	case "getActiveDeviceBG":
 		// Create a proxy response function to catch errors that can happen
-		// when one of the non-top content scripts loads before top is done.
-		var responder = function (...args){
+		// when the top content scripts is not (yet) resposnding.
+		const responder = function (...args) {
 			if (args.length === 0) {
-				console.log(chrome.runtime.lastError);
+				if (chrome.runtime.lastError) {
+					// Do nothing.
+					// We just need to read this lastError value to
+					// prevent an error being logged to the console.
+				 }
+				 // The top content script is not (yet) responding
+				sendResponse(null);
 			} else {
 				sendResponse.apply(this, args);
 			}
 		}
-		// Relay the message to the top-level content script.
-		chrome.tabs.sendMessage(sender.tab.id, request, responder);
-		break;
-	case "getMicAccess":
-		// Return the current microphone access permissions for tab.
-		// Unused currently as we couldn't find a useful way to restore
-		// the value without breaking functionality.
-		chrome.contentSettings.microphone.get({
-			incognito: sender.tab.incognito,
-			primaryUrl: sender.tab.url
-		}).then(function (result) {
-			sendResponse(result.setting);
-		});
-		break;
+		// Relay the message to the top (frameId: 0) content script.
+		chrome.tabs.sendMessage(sender.tab.id,
+			{action: "getActiveDevice"}, {frameId: 0}, responder);
+		// We need to return true from onMessage() to keep the channel open,
+		// since our sendReponse() is called asynchronously here.
+		return true;
 	case "setMicAccess":
 		// Set the current microphone access permissions for the tab.
 		// Request format: {value: "allow"}
@@ -50,25 +43,47 @@ function onMessage(request, sender, sendResponse) {
 				: "regular"
 			),
 			setting: request.value
-		}).then(function () {
-			sendResponse(request.value);
+		}).then(function() {
+			sendResponse(true);
+		}).catch(function() {
+			sendResponse(false);
 		});
-		break;
+		return true;
 	case "injectSink":
-		// Inject the current sinkId for the requesting tab into MAIN.
+		// Inject the passed sinkId (request.value) into MAIN.
 		// Then dispatch a "changeSinkId" event to update all elements.
+		//
+		// NOTE that target: {allFrames: true} does not make sense, simce
+		// 1. we only want to target frames where we actually injected our
+		//    content scripts and
+		// 2. (even more importantly) sinkIds are unique per frame, i. e.
+		//    the same device has a different deviceId in top and in sub.
+		// Basically the content scripts for top and sub-frames need to
+		// independently calculate and pass the correct sinkId for their
+		// window/frame and the worker needs to explicitely target the
+		// sender's frameId(s).
 		chrome.scripting.executeScript({
-			args : [request.value],
-			func : function (activeSinkId) {
-				window.activeSinkId = activeSinkId;
+			args: [request.value],
+			func: function (activeSinkId) {
+				window.APV3_UN1QU3_activeSinkId = activeSinkId;
 				window.dispatchEvent(
 					new CustomEvent(
 						"changeSinkId",
-						{ detail: activeSinkId }
+						{detail: activeSinkId}
 					)
 				);
 			},
-			target : {tabId : sender.tab.id, allFrames : false},
+			target: {tabId: sender.tab.id, frameIds: [sender.frameId], allFrames : false},
+			world: "MAIN"
+		});
+		break;
+	case "injectDebug":
+		chrome.scripting.executeScript({
+			args: [request.value],
+			func: function (enableDebug) {
+				window.APV3_UN1QU3_enableDebug = enableDebug;
+			},
+			target: {tabId: sender.tab.id, frameIds: [sender.frameId], allFrames : false},
 			world: "MAIN"
 		});
 		break;

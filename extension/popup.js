@@ -33,10 +33,11 @@ function checkboxDebug_OnChange(e) {
 	} else {
 		chrome.storage.local.set({"enableDebug": false});
 	}
-	// Don't try to pass a boolean here ... JavaScript sucks!
-	chrome.tabs.sendMessage(activeTab.id, {
-		action: "updateDebug",
-		value: e.target.checked ? "yes" : "no"
+	chrome.tabs.sendMessage(activeTab.id,
+		{action: "updateDebug", value: e.target.checked}
+	).catch(function() {
+		// Do nothing.
+		// There might be no content script running in the target tab.
 	});
 }
 
@@ -376,27 +377,25 @@ async function init() {
 		}
 		// Get the active device from the current tab.
 		try {
-			const response = await chrome.tabs.sendMessage(activeTab.id, {
-				action: "getActiveDevice"
-			});
+			const response = await chrome.tabs.sendMessage(
+				activeTab.id, {action: "getActiveDevice"}, {frameId: 0});
 			if (response) {
 				activeDevice = response;
 			}
-		} catch(error) {
+		} catch {
 			tabError = "Content Script not reponding. Try reload.";
 		}
 	}
 	if (tabError === "") {
 		// Get the site's Permissions-Policy for microphone access.
 		try {
-			const response = await chrome.tabs.sendMessage(activeTab.id, {
-				action: "getMicPolicy"
-			});
+			const response = await chrome.tabs.sendMessage(
+				activeTab.id, {action: "getMicPolicy"}, {frameId: 0});
 			micPolicy = response;
 			if (response === "denied")  {
 				tabError = "Site denies microphone access.";
 			}
-		} catch(error) {
+		} catch {
 			tabError = "Content Script not reponding. Try reload.";
 		}
 	}

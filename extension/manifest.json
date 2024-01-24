@@ -32,13 +32,13 @@
 			"matches": ["https://*/*"],
 			"js": ["main.js"],
 			"world": "MAIN",
-			"all_frames" : false
+			"all_frames" : true
 		},
 		{
 			"matches": ["https://*/*"],
 			"js": ["content.js"],
 			"world": "ISOLATED",
-			"all_frames" : false
+			"all_frames" : true
 		}
 	],
 	"permissions": [
