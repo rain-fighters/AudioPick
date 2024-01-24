@@ -1,5 +1,17 @@
 # CHANGELOG
 
+### AudioPick-0.3.10
+- Improve debug logging, e. g. inject "enableDebug" into content scripts running world MAIN.
+- Fully support Deezer and SoundCloud.
+- Add a "smartMicAccess" mode (enabled via checkbox in the Popup) which significantly reduces microphone permissions granted by the extension.
+- Add an info message to the popup header.
+- Add a "site info heading" with favicon, host/domain and micPolicy.
+- No longer offer the "communications" device to be picked.
+- Improve "default" device label on Windows (and possibly MacOS).
+- Improve demo page (resources/index.*), e. g. add an AudioContext and a video in iframe example.
+- Fix/enhance communication with sub-frames, but disable injecting
+into all_frames for now, since changing sinkIds in sub-frames only works on same-origin or when the iframe specifies allow="microphone".
+
 ### AudioPick-0.3.9
 - Add a Popup / UI option to enable/disable content script debug messages.
 - Detect and respect site Permissions-Policy for microphone access,
