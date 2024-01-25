@@ -3,13 +3,13 @@ A **Chrome Manifest V3 Extension** to pick a preferred audio output device for *
 
 ## How it works
 The extension finds **HTML5** `<audio/>` and `<video/>` elements within the document tree and manipulates the `sinkId` in order
-to switch to the preferred audio output device. Since version `0.3.8` it also finds audio/video objects (`new Audio(...)`) that have not been inserted into the document tree, e. g. **Spotify** and **SoundCloud** should now work with the extension, too.
+to switch to the preferred audio output device. Since version `0.3.8` it also finds `Audio`, `Video` and `AudioContext` objects that have not been inserted into the document tree, e. g. **Spotify** and **SoundCloud** should now work with the extension, too.
 
 Since it's now possible to store/remember a preferred audio output device **per site/domain**, the extension's **option panel** and hence the option to set a global preferred device (for the browser) has been removed. This also significantly reduces the number of microphone permission that the extension acquires (see below).
 
-**Note** that the **Audio Ouput Devices API** requires media (microphone) permissions to be granted to every site with audio sinks that need to be manipulated, which &ndash; as a result &ndash; allows those sites to access your microphone. Hence **AudioPick** only acquires permissions when the user actually picks a non-default device for a site and restores permissions when the user reverts back to using the default.
+**Note** that the **Media Capture and Streams API** requires media (microphone) permissions to be granted to every site with audio sinks that need to be manipulated, which &ndash; as a result &ndash; allows those sites to access your microphone. Hence **AudioPick** only acquires permissions when the user actually picks a non-default device for a site and restores permissions when the user reverts back to using the default. Since version `0.3.10` a `smartMicAccess` mode can be activated in the UI which further reduces the number of microphone permissions granted by the extension.
 
-Check the [**FAQ**](./FAQ.md) for more information.
+Check the [**FAQ**](./FAQ.md) and the [**ChangeLog**](./CHANGELOG.md) for more information.
 
 ## Free/Libre Open Source
 We publish this/our software as **Free/Libre Open Source** licensed under [**GPL-3.0**](https://www.gnu.org/licenses/gpl-3.0.en.html#license-text) to ensure that you have and continue to have the following four fundamental freedoms:
