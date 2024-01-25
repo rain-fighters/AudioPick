@@ -4,12 +4,18 @@
 @import "{{ site.theme }}";
 
 :root {
+/*
 	--sans-font: 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
 	--mono-font: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
-/*
+
 	--sans-font: Noto, "Segoe UI", Calibri, Arial, Helvetica, sans-serif;
 	--mono-font: Consolas, "Noto Sans Mono", "Bitstream Vera Sans Mono", Menlo, Monaco, monospace;
 */
+
+	/* GitHub websafe fonts */
+	--sans-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+	--mono-font: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
 	--base-font-size: 1rem;
 	--medium-font-size: .9rem;
 	--mono-font-size: .8125rem;
