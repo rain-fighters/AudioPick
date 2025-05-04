@@ -31,16 +31,11 @@ function APV3_UN1QU3_debugMessage(...args) {
 }
 
 async function APV3_UN1QU3_maybeSetSinkId(targetElement, trigger, sinkId) {
-	if (sinkId === "default") {
-		sinkId = "";
-	}
-	if (sinkId === targetElement.sinkId) {
-		return true;
-	}
 	try {
+		// Get delegate for sink ID management
 		let sinkIdReceiver;
 		if (targetElement instanceof AudioContext) {
-			// Web Audio API: Direct AudioContext events (e.g., resume)
+			// Web Audio API: Direct AudioContext events (e.g., "resume")
 			sinkIdReceiver = targetElement;
 		} else if (targetElement instanceof AudioNode) {
 			// Web Audio API: Handle AudioNode updates by assigning the AudioContext sink directly
@@ -49,6 +44,14 @@ async function APV3_UN1QU3_maybeSetSinkId(targetElement, trigger, sinkId) {
 			// Other receivers (HTML media elements)
 			sinkIdReceiver = targetElement;
 		}
+		// Get intended new sink ID
+		if (sinkId === "default") {
+			sinkId = "";
+		}
+		if (sinkId === sinkIdReceiver.sinkId) {
+			return true;
+		}
+		// Set new sink ID
 		APV3_UN1QU3_debugMessage("| " + trigger + "(try):", targetElement.constructor.name, "| targetElement:", targetElement,
 			"| foundViaMethod:", targetElement.foundViaMethod,
 			"| oldSinkId:", sinkIdReceiver.sinkId, "| sinkId:", sinkId);
