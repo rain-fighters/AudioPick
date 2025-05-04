@@ -37,22 +37,26 @@ async function APV3_UN1QU3_maybeSetSinkId(targetElement, trigger, sinkId) {
 	if (sinkId === targetElement.sinkId) {
 		return true;
 	}
-	if ((targetElement instanceof HTMLMediaElement) && (targetElement.sourceOfAudioContext)) {
-		// Skip setsinkId() on HTMLMediaElement(s)s that were used to
-		// create MediaElementAudioSourceNode(s) of an AudioContext.
-		APV3_UN1QU3_debugMessage("| " + trigger + "(skip):", targetElement.constructor.name, "| targetElement:", targetElement,
-				"| sourceOfAudioContext:", targetElement.sourceOfAudioContext, "| foundViaMethod:", targetElement.foundViaMethod);
-		return false;
-	}
 	try {
+		let sinkIdReceiver;
+		if (targetElement instanceof AudioContext) {
+			// Web Audio API: Direct AudioContext events (e.g., resume)
+			sinkIdReceiver = targetElement;
+		} else if (targetElement instanceof AudioNode) {
+			// Web Audio API: Handle AudioNode updates by assigning the AudioContext sink directly
+			sinkIdReceiver = targetElement.context;
+		} else {
+			// Other receivers (HTML media elements)
+			sinkIdReceiver = targetElement;
+		}
 		APV3_UN1QU3_debugMessage("| " + trigger + "(try):", targetElement.constructor.name, "| targetElement:", targetElement,
-			"| sourceOfAudioContext:", targetElement.sourceOfAudioContext, "| foundViaMethod:", targetElement.foundViaMethod,
-			"| oldSinkId:", targetElement.sinkId, "| sinkId:", sinkId);
-		await targetElement.setSinkId(sinkId);
+			"| foundViaMethod:", targetElement.foundViaMethod,
+			"| oldSinkId:", sinkIdReceiver.sinkId, "| sinkId:", sinkId);
+		await sinkIdReceiver.setSinkId(sinkId);
 		return true;
 	} catch(error) {
 		APV3_UN1QU3_debugMessage("| " + trigger + "(catch):", targetElement.constructor.name, "| targetElement:", targetElement,
-			"| sourceOfAudioContext:", targetElement.sourceOfAudioContext, "| foundViaMethod:", targetElement.foundViaMethod,
+			"| foundViaMethod:", targetElement.foundViaMethod,
 			"| oldSinkId:", targetElement.sinkId, "| sinkId:", sinkId, "| error:", error);
 		return false;
 	}
@@ -140,52 +144,38 @@ function APV3_UN1QU3_hookHTMLMediaElement_various() {
 	};
 }
 
-// Hook all AudioContext.prototype create functions to catch any AudioContexts.
+// Hook all Web Audio API (AudioContext) related prototype functions to manage AudioContext sinks.
 function APV3_UN1QU3_hookAudioContext_create() {
-	// Alias AudioContext.prototype to allow for shorter line length.
+	// Handle direct AudioContext interactions (cover additional cases, such as on-resume if
+	// extension is not loaded until after AudioContext is created)
 	const AC = AudioContext.prototype;
 	// Don't double-hook if we already did in this context.
-	if (typeof(AC.createMediaElementSource_noHook) !== "function") {
+	if (typeof(AC.resume_noHook) !== "function") {
 		// Save the original functions for callback.
-		AC.createMediaElementSource_noHook = AC.createMediaElementSource;
-		AC.createMediaStreamSource_noHook = AC.createMediaStreamSource;
-		AC.createMediaStreamDestination_noHook = AC.createMediaStreamDestination;
-		AC.createMediaStreamTrackSource_noHook = AC.createMediaStreamTrackSource;
+		AC.resume_noHook = AC.resume;
 	}
 	// Set our hooks
 	// Each hooked function simply calls addListenerAndSetSinkId on the object
 	// before calling and returning the value from the original function.
-	AC.createMediaElementSource = function(...args) {
-		APV3_UN1QU3_addListenerAndSetSinkId(this, "createMediaElementSource_hook");
-		// Mark the HTMLMediaElement (args[0]) used to create the MediaElementAudioSourceNode
-		// as being used by an AudioContext to prevent calling setSinkId() on it.
-		args[0].sourceOfAudioContext = true;
-		return this.createMediaElementSource_noHook.apply(this, args);
-	};
-	AC.createMediaStreamSource = function(...args) {
-		APV3_UN1QU3_addListenerAndSetSinkId(this, "createMediaStreamSource_hook");
-		return this.createMediaStreamSource_noHook.apply(this, args);
-	};
-	AC.createMediaStreamDestination = function(...args) {
-		APV3_UN1QU3_addListenerAndSetSinkId(this, "createMediaStreamDestination_hook");
-		return this.createMediaStreamDestination_noHook.apply(this, args);
-	};
-	AC.createMediaStreamTrackSource = function(...args) {
-		APV3_UN1QU3_addListenerAndSetSinkId(this, "createMediaStreamTrackSource_hook");
-		return this.createMediaStreamTrackSource_noHook.apply(this, args);
-	};
+	AC.resume = function(...args) {
+		APV3_UN1QU3_addListenerAndSetSinkId(this, "resume_hook");
+		return this.resume_noHook.apply(this, args);
+	}
 
-	// Handle various AudioNode-based types, such as AudioBufferSourceNode, ConstantSourceNode,
-	// MediaElementSourceNode, etc. These follow a newer, MDN-recommended IoC pattern where
-	// AudioContext is no longer natively aware of all possible implementations, but rather
-	// AudioNode subtypes are responsible for referencing the AudioContext during construction.
+	// Handle AudioContext via its various AudioNode-based types, such as AudioBufferSourceNode,
+	// ConstantSourceNode, MediaElementSourceNode, etc. These follow the MDN-recommended IoC pattern
+	// for the Web Audio API, creating notes via AudioNode subtype constructors rather than
+	// AudioContext factory methods. For reference, see MDN:
+	// https://developer.mozilla.org/en-US/docs/Web/API/AudioNode#creating_an_audionode
 	const AN = AudioNode.prototype;
+	// Don't double-hook if we already did in this context.
 	if (typeof(AN.connect_noHook) !== "function") {
+		// Save the original functions for callback.
 		AN.connect_noHook = AN.connect;
 	}
 	// Set our hooks
-	// This follows the same pattern as above. Listeners are added such that sink IDs can be
-	// assigned during calls.
+	// Each hooked function simply calls addListenerAndSetSinkId on the object
+	// before calling and returning the value from the original function.
 	AN.connect = function(...args) {
 		APV3_UN1QU3_addListenerAndSetSinkId(this, "connect_hook");
 		return this.connect_noHook.apply(this, args);
