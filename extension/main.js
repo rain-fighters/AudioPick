@@ -31,6 +31,9 @@ function APV3_UN1QU3_debugMessage(...args) {
 }
 
 async function APV3_UN1QU3_maybeSetSinkId(targetElement, trigger, sinkId) {
+	if (sinkId === "default") {
+		sinkId = "";
+	}
 	try {
 		// Get delegate for sink ID management
 		let sinkIdReceiver;
@@ -44,10 +47,7 @@ async function APV3_UN1QU3_maybeSetSinkId(targetElement, trigger, sinkId) {
 			// Other receivers (HTML media elements)
 			sinkIdReceiver = targetElement;
 		}
-		// Get intended new sink ID
-		if (sinkId === "default") {
-			sinkId = "";
-		}
+		// Avoid redundant assignments
 		if (sinkId === sinkIdReceiver.sinkId) {
 			return true;
 		}
