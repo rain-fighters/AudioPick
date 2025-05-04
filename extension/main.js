@@ -151,7 +151,6 @@ function APV3_UN1QU3_hookAudioContext_create() {
 		AC.createMediaStreamSource_noHook = AC.createMediaStreamSource;
 		AC.createMediaStreamDestination_noHook = AC.createMediaStreamDestination;
 		AC.createMediaStreamTrackSource_noHook = AC.createMediaStreamTrackSource;
-		AC.createBufferSource_noHook = AC.createBufferSource;
 	}
 	// Set our hooks
 	// Each hooked function simply calls addListenerAndSetSinkId on the object
@@ -175,10 +174,22 @@ function APV3_UN1QU3_hookAudioContext_create() {
 		APV3_UN1QU3_addListenerAndSetSinkId(this, "createMediaStreamTrackSource_hook");
 		return this.createMediaStreamTrackSource_noHook.apply(this, args);
 	};
-	AC.createBufferSource = function(...args) {
-		APV3_UN1QU3_addListenerAndSetSinkId(this, "createBufferSource_hook");
-		return this.createBufferSource_noHook.apply(this, args);
-	};
+
+	// Handle various AudioNode-based types, such as AudioBufferSourceNode, ConstantSourceNode,
+	// MediaElementSourceNode, etc. These follow a newer, MDN-recommended IoC pattern where
+	// AudioContext is no longer natively aware of all possible implementations, but rather
+	// AudioNode subtypes are responsible for referencing the AudioContext during construction.
+	const AN = AudioNode.prototype;
+	if (typeof(AN.connect_noHook) !== "function") {
+		AN.connect_noHook = AN.connect;
+	}
+	// Set our hooks
+	// This follows the same pattern as above. Listeners are added such that sink IDs can be
+	// assigned during calls.
+	AN.connect = function(...args) {
+		APV3_UN1QU3_addListenerAndSetSinkId(this, "connect_hook");
+		return this.connect_noHook.apply(this, args);
+	}
 }
 
 // Hook Element.prototype.attachShadow so we see any shadowRoots created.
