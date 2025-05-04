@@ -151,6 +151,7 @@ function APV3_UN1QU3_hookAudioContext_create() {
 		AC.createMediaStreamSource_noHook = AC.createMediaStreamSource;
 		AC.createMediaStreamDestination_noHook = AC.createMediaStreamDestination;
 		AC.createMediaStreamTrackSource_noHook = AC.createMediaStreamTrackSource;
+		AC.createBufferSource_noHook = AC.createBufferSource;
 	}
 	// Set our hooks
 	// Each hooked function simply calls addListenerAndSetSinkId on the object
@@ -173,6 +174,10 @@ function APV3_UN1QU3_hookAudioContext_create() {
 	AC.createMediaStreamTrackSource = function(...args) {
 		APV3_UN1QU3_addListenerAndSetSinkId(this, "createMediaStreamTrackSource_hook");
 		return this.createMediaStreamTrackSource_noHook.apply(this, args);
+	};
+	AC.createBufferSource = function(...args) {
+		APV3_UN1QU3_addListenerAndSetSinkId(this, "createBufferSource_hook");
+		return this.createBufferSource_noHook.apply(this, args);
 	};
 }
 
