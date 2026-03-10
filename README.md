@@ -40,7 +40,7 @@ If we get access to usage/user data, e. g. IP or email addresses, it's most like
 ## Tips
 That all being said, you may show appreciation for our work by paying a completely voluntary tip. For that purpose we have created a [&#10084;Payment link on Stripe](https://buy.stripe.com/9AQ2bp1MJbkeboQ7ss) which allows you to give any amount between 1€ and 10€, defaulting to 3€ to keep the processing fee ratio in check.
 
-Sadly, using this link/page for tipping does not work anonymously, e. g. **Stripe** requires you to enter a valid email address, but we haven't found a better / more private way, e. g. online cash, to show monetary appreciation over the internet. Hence you should only use the link/page, when you are aware of and agree to its privacy implications.
+Sadly, using this link/page for tipping does not work anonymously, e. g. **Stripe** requires you to enter a valid email address, but we haven't found a better way to show monetary appreciation over the internet. Hence you should only use the link/page, when you are aware of and agree to its privacy implications.
 
 ## Links
 - [AudioPick Extension on the Chrome Webstore](https://chrome.google.com/webstore/detail/audiopick/gfhcppdamigjkficnjnhmnljljhagaha)
