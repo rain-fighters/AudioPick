@@ -26,7 +26,7 @@ While **Free/Libre Open Source** refers to **free** as in **free speech**, not a
 - to not grant benefits or add additional features to/for users offering payment, and
 - to not put (commercial) advertisements into our software or on our web pages.
 
-Though we accept [&#10084;Gratuities](#gratuities).
+Though we accept [&#10084;Tips](#tips).
 
 ## Privacy
 **Privacy** and **Liberty** go hand in hand. You should not be **forced** to willingly or even unwillingly disclose personal data in order to be able to use a software or access information that is important for you. Hence neither our software nor our web pages collect usage data or require registration.
@@ -37,7 +37,7 @@ Our software, in this case the **AudioPick** extension, does not track usage dat
 
 If we get access to usage/user data, e. g. IP or email addresses, it's most likely unavoidable and we do our best to get rid of unneeded information, e. g. rotate log files of web servers we control. In any case, we do not transfer or even sell any usage/user data to 3rd parties.
 
-## Gratuities
+## Tips
 That all being said, you may show appreciation for our work by paying a completely voluntary tip. For that purpose we have created a [&#10084;Payment link on Stripe](https://buy.stripe.com/9AQ2bp1MJbkeboQ7ss) which allows you to give any amount between 1€ and 10€, defaulting to 3€ to keep the processing fee ratio in check.
 
 Sadly, using this link/page for tipping does not work anonymously, e. g. **Stripe** requires you to enter a valid email address, but we haven't found a better / more private way, e. g. online cash, to show monetary appreciation over the internet. Hence you should only use the link/page, when you are aware of and agree to its privacy implications.
